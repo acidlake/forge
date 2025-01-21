@@ -3,28 +3,31 @@
 namespace Base\Core;
 
 use Base\Interfaces\ConfigurationManagerInterface;
+use Base\Tools\EnvLoader;
 
 /**
- * ConfigurationManager handles the loading and management of configuration files.
+ * ConfigurationManager handles loading and managing configuration files for the Forge framework.
  *
- * This class supports loading framework and application-specific configurations, with the ability
- * to override framework configurations using application configurations. It also provides methods
- * to retrieve configuration groups or specific keys dynamically.
+ * This class supports:
+ * - Loading `.env` files for environment-specific configurations.
+ * - Merging framework and application-specific configuration files, with the application overriding the framework.
+ * - Resolving `env()` references in configuration files to their corresponding environment variable values.
  *
  * @framework Forge
  * @license MIT
  * @github acidlake
  * @class ConfigurationManager
- * @version 1.0.0
+ * @version 1.1.0
  * @category Configuration Management
  * @package Base\Core
+ * @env-compatibility Supports loading .env files and resolving env() variables in configs.
  * @author Jeremias
  * @copyright 2025
  */
 class ConfigurationManager implements ConfigurationManagerInterface
 {
     /**
-     * Array to hold all loaded configurations.
+     * Stores all loaded configuration data.
      *
      * @var array
      */
@@ -35,22 +38,31 @@ class ConfigurationManager implements ConfigurationManagerInterface
      *
      * @param string      $frameworkConfigPath The path to the framework's configuration directory.
      * @param string|null $appConfigPath       The path to the application's configuration directory (optional).
+     * @param string|null $envPath             The path to the `.env` file (optional).
      */
     public function __construct(
         string $frameworkConfigPath,
-        string $appConfigPath = null
+        string $appConfigPath = null,
+        string $envPath = null
     ) {
+        // Load .env file if provided
+        if ($envPath !== null) {
+            EnvLoader::load($envPath);
+        }
+
+        // Load framework configs
         $this->loadConfigs($frameworkConfigPath);
 
-        if ($appConfigPath !== null && is_dir($appConfigPath)) {
-            $this->loadConfigs($appConfigPath, true); // Load app configs to override framework configs
+        // Override with app configs
+        if ($appConfigPath !== null) {
+            $this->loadConfigs($appConfigPath, true);
         }
     }
 
     /**
-     * Load configuration files from the specified directory.
+     * Load configuration files from a directory.
      *
-     * @param string $path     The directory path containing configuration files.
+     * @param string $path     The directory containing configuration files.
      * @param bool   $override Whether to override existing configurations.
      *
      * @return void
@@ -65,12 +77,40 @@ class ConfigurationManager implements ConfigurationManagerInterface
                 $this->configs[$configName] = [];
             }
 
-            // Merge framework configs with app configs, prioritizing app configs
             $this->configs[$configName] = array_merge(
                 $this->configs[$configName],
-                $configData
+                $this->resolveEnvVariables($configData)
             );
         }
+    }
+
+    /**
+     * Resolve `env()` placeholders in configuration data.
+     *
+     * This method replaces strings in the format `env(KEY)` with their corresponding
+     * environment variable values or null if the variable is not set.
+     *
+     * @param array $config The configuration array to process.
+     *
+     * @return array The processed configuration array with resolved `env()` values.
+     */
+    private function resolveEnvVariables(array $config): array
+    {
+        array_walk_recursive($config, function (&$value) {
+            if (
+                is_string($value) &&
+                preg_match('/^env\(([^,]+)(?:,\s*(.+))?\)$/', $value, $matches)
+            ) {
+                $envKey = trim($matches[1]);
+                $defaultValue = isset($matches[2])
+                    ? trim($matches[2], " '\"")
+                    : null; // Extract default value if provided
+                $value =
+                    getenv($envKey) !== false ? getenv($envKey) : $defaultValue; // Use .env value or default
+            }
+        });
+
+        return $config;
     }
 
     /**

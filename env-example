@@ -1,0 +1,66 @@
+# ====================================
+# General Application Settings
+# ====================================
+APP_NAME="Forge Framework"
+APP_VERSION="0.1.1"
+APP_ENV="development" # Options: development, production, staging
+
+# ====================================
+# Database Configuration
+# ====================================
+
+# The default database connection type
+DB_CONNECTION="mysql"
+DB_HOST="127.0.0.1" # The database host (usually an IP address or hostname)
+DB_PORT=3306 # The port for the database connection
+DB_DATABASE="forge" # The name of the database
+DB_USERNAME="root" # The database username
+DB_PASSWORD="" # The database password (leave empty for no password)
+
+# ====================================
+# Cache Configuration
+# ====================================
+CACHE_DRIVER="file" # Options: file, redis, memcached
+REDIS_HOST="127.0.0.1" # Redis host for caching (only if CACHE_DRIVER is set to redis)
+REDIS_PORT=6379 # Redis port for caching
+
+# ====================================
+# Mail Configuration
+# ====================================
+
+# The mail driver to use
+MAIL_DRIVER="smtp" # Options: smtp, sendmail, mailgun, etc.
+MAIL_HOST="smtp.example.com" # The SMTP host for outgoing mail
+MAIL_PORT=587 # The SMTP port for outgoing mail
+MAIL_USERNAME="noreply@example.com" # The email address used for sending emails
+MAIL_PASSWORD="password" # The password for the email address
+MAIL_ENCRYPTION="tls" # Options: tls, ssl, none
+
+# ====================================
+# Logging Configuration
+# ====================================
+
+# The log channel to use
+LOG_CHANNEL="daily" # Options: single, daily, syslog, errorlog
+LOG_PATH="storage/logs" # The path where log files will be stored
+
+# ====================================
+# Security Configuration
+# ====================================
+APP_KEY="your-secret-key" # The secret key for application encryption
+
+# Enable or disable debug mode
+APP_DEBUG=true # WARNING: Do not enable in production environments
+
+# ====================================
+# API Configuration
+# ====================================
+API_RATE_LIMIT=60 # API rate limit (requests per minute)
+API_DEBUG=true # Enable or disable API debugging
+
+# ====================================
+# Miscellaneous Settings
+# ====================================
+APP_TIMEZONE="UTC" # Default timezone for the application
+APP_LOCALE="en" # Locale setting for the application
+APP_FALLBACK_LOCALE="en" # Fallback locale if the primary locale is not available

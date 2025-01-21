@@ -63,14 +63,7 @@ class CoreServiceProvider extends ServiceProvider
 
         // Register the ConfigManager
         $container->bind(ConfigurationManagerInterface::class, function () {
-            return new ConfigurationManager(CONFIG_PATH);
-        });
-
-        $container->bind(ConfigurationManagerInterface::class, function () {
-            return new ConfigurationManager(
-                CORE_CONFIG_PATH, // Framework config path
-                APP_CONFIG_PATH // Application config path
-            );
+            return new ConfigurationManager(CORE_CONFIG_PATH, APP_CONFIG_PATH);
         });
 
         // Register default config helper

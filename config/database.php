@@ -1,30 +1,19 @@
 <?php
-return [
-    "default" => "mysql",
-    "connections" => [
-        "mysql" => [
-            "host" => "127.0.0.1",
-            "port" => 3306,
-            "database" => "forge",
-            "username" => "root",
-            "password" => "",
-        ],
-    ],
-];
-<?php
-
+use Base\Helpers\EnvHelper;
 /**
  * Database Configuration for the Forge framework.
  *
  * This configuration file defines the default database connection and its settings.
- * You can add multiple database connections and select the default one to use.
+ * It supports loading values from an `.env` file with sensible default values.
  *
  * @framework Forge
  * @license MIT
  * @github acidlake
  * @config Database Configuration
- * @version 1.0.0
+ * @version 1.1.0
  * @category Configuration
+ * @env-compatibility Supports loading configuration values using the env() helper.
+ * @defaults Provides default values for all configurations if environment variables are not set.
  * @author Jeremias
  * @copyright 2025
  */
@@ -37,26 +26,23 @@ return [
      *
      * @var string
      */
-    "default" => "mysql",
+    "default" => EnvHelper::get("DB_CONNECTION", "mysql"),
 
     /**
      * Database Connections
      *
-     * Defines the available database connections. Each connection specifies
-     * the host, port, database name, username, and password for the connection.
-     *
-     * Example:
-     * - MySQL connection details.
+     * Defines the available database connections. Each connection supports loading
+     * environment variables with default values to ensure flexibility and ease of use.
      *
      * @var array
      */
     "connections" => [
         "mysql" => [
-            "host" => "127.0.0.1",        // Database server hostname or IP address
-            "port" => 3306,              // Database server port
-            "database" => "forge",       // Name of the database
-            "username" => "root",        // Database username
-            "password" => "",            // Database password
+            "host" => EnvHelper::get("DB_HOST", "127.0.0.1"), // Database server hostname or IP address
+            "port" => EnvHelper::get("DB_PORT", 3306), // Database server port
+            "database" => EnvHelper::get("DB_DATABASE", "forge"), // Name of the database
+            "username" => EnvHelper::get("DB_USERNAME", "root"), // Database username
+            "password" => EnvHelper::get("DB_PASSWORD", ""), // Database password
         ],
     ],
 ];

@@ -34,5 +34,6 @@
         <p>Total posts: {{ $totalPosts }}</p>
 
         <a $attributes>Visit Example</a>
+
 </body>
 </html>
