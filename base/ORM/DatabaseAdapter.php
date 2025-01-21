@@ -13,6 +13,13 @@ class DatabaseAdapter implements ORMDatabaseAdapterInterface
         $this->pdo = $pdo;
     }
 
+    public function query(string $sql, array $params = []): mixed
+    {
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($params);
+        return $stmt;
+    }
+
     public function find(string $table, string $field, mixed $value): ?array
     {
         $query = "SELECT * FROM {$table} WHERE {$field} = :value LIMIT 1";

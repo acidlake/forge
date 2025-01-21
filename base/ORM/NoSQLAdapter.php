@@ -5,6 +5,11 @@ use Base\Interfaces\ORMDatabaseAdapterInterface;
 
 class NoSQLAdapter implements ORMDatabaseAdapterInterface
 {
+    public function query(string $sql, array $params = []): mixed
+    {
+        // NoSQL-like query operation
+    }
+
     public function find(string $table, string $key, mixed $value): ?array
     {
         // NoSQL-like find operation
