@@ -2,7 +2,7 @@
 
 namespace App\Commands;
 
-use Base\Commands\CommandInterface;
+use Base\Interfaces\CommandInterface;
 
 class HelloCommand implements CommandInterface
 {
@@ -11,7 +11,12 @@ class HelloCommand implements CommandInterface
         return "hello";
     }
 
-    public function handle(array $args): void
+    public function getDescription(): string
+    {
+        return "Starts the database migrations";
+    }
+
+    public function execute(array $arguments = []): void
     {
         $name = $args[0] ?? "World";
         echo "Hello, {$name}!" . PHP_EOL;

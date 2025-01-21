@@ -1,0 +1,16 @@
+#!/usr/bin/env php
+<?php
+define("BASE_PATH", __DIR__);
+
+require_once __DIR__ . "/base/Core/Autoloader.php";
+
+use Base\Core\Autoloader;
+use Base\Core\CLI;
+
+// Register the autoloader
+Autoloader::register();
+
+// Run the CLI handler
+$cli = new CLI();
+$cli->handle($argv);
+

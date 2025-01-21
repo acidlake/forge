@@ -2,10 +2,10 @@
 
 namespace Base\Commands;
 
-use Base\Interfaces\CommandInterface;
 use Base\Core\CLI;
+use Base\Interfaces\CommandInterface;
 
-class HelpCommand implements CommandInterface
+class ListCommand implements CommandInterface
 {
     private CLI $cli;
 
@@ -16,12 +16,12 @@ class HelpCommand implements CommandInterface
 
     public function getName(): string
     {
-        return "help";
+        return "list";
     }
 
     public function getDescription(): string
     {
-        return "Displays a list of available commands.";
+        return "Lists all available commands.";
     }
 
     public function execute(array $arguments = []): void
