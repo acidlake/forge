@@ -5,6 +5,7 @@
 - Feat: Added htaccess files
 - Feat: Added index in the root to prevent direct access
 - Feat: Added configuration manager
+- Feat: Added Environment loader
 
 ### v0.1.0
 - Feat: Initial Version
