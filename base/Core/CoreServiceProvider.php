@@ -4,9 +4,11 @@ namespace Base\Core;
 
 use Base\Adapters\CustomRouter;
 use Base\Adapters\MonologAdapter;
+use Base\Interfaces\ConfigHelperInterface;
 use Base\Interfaces\LoggerInterface;
 use Base\Interfaces\RouterInterface;
 use Base\Templates\DefaultViewEngine;
+use Base\Tools\ConfigHelper;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 use Base\Interfaces\ViewInterface;
@@ -57,5 +59,8 @@ class CoreServiceProvider extends ServiceProvider
         $container->bind(ViewInterface::class, function () {
             return new DefaultViewEngine(VIEW_PATH);
         });
+
+        // Register default config helper
+        $container->bind(ConfigHelperInterface::class, ConfigHelper::class);
     }
 }
