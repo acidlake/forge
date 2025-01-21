@@ -4,6 +4,7 @@ namespace Base\Core;
 
 use Base\Adapters\CustomRouter;
 use Base\Adapters\MonologAdapter;
+use Base\Helpers\EnvHelper;
 use Base\Interfaces\ConfigHelperInterface;
 use Base\Interfaces\ConfigurationManagerInterface;
 use Base\Interfaces\LoggerInterface;
@@ -34,6 +35,12 @@ class CoreServiceProvider extends ServiceProvider
      */
     public function register(Container $container): void
     {
+        // Register environment helper
+        $container->bind(EnvHelper::class, function () {
+            EnvHelper::initialize();
+            return new EnvHelper();
+        });
+
         // Register the router
         $container->bind(
             RouterInterface::class,
@@ -49,7 +56,10 @@ class CoreServiceProvider extends ServiceProvider
             // Create a Monolog instance with a StreamHandler
             $monolog = new Logger("app");
             $monolog->pushHandler(
-                new StreamHandler(BASE_PATH . "/logs/app.log", Logger::DEBUG)
+                new StreamHandler(
+                    BASE_PATH . EnvHelper::get("LOG_PATH"),
+                    Logger::DEBUG
+                )
             );
 
             // Return the MonologAdapter with the Monolog instance
@@ -63,7 +73,11 @@ class CoreServiceProvider extends ServiceProvider
 
         // Register the ConfigManager
         $container->bind(ConfigurationManagerInterface::class, function () {
-            return new ConfigurationManager(CORE_CONFIG_PATH, APP_CONFIG_PATH);
+            return new ConfigurationManager(
+                CORE_CONFIG_PATH,
+                APP_CONFIG_PATH,
+                ENV_PATH
+            );
         });
 
         // Register default config helper

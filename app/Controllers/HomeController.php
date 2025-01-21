@@ -5,6 +5,7 @@ namespace App\Controllers;
 use Base\Core\ContainerAwareTrait;
 use Base\Interfaces\ConfigHelperInterface;
 use Base\Interfaces\ViewInterface;
+use Base\Helpers\EnvHelper;
 
 /**
  * HomeController handles the rendering of the homepage.
@@ -87,9 +88,15 @@ class HomeController
             "attributes" => $attributes,
         ];
 
-        print $config->get("app.name");
-        print $config->get("app.version");
-        print $config->get("app.environment");
+        if (EnvHelper::is("development")) {
+            echo "You're in development!";
+        } elseif (EnvHelper::is("production")) {
+            echo "You're in production!";
+        } else {
+            echo "You're in an unknown environment!";
+        }
+
+        print_r($config->get("environment.supported"));
 
         // Render the view template with the prepared data
         return $view->render("home.index", $data);
