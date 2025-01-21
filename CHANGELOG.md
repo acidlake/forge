@@ -2,6 +2,8 @@
 - Feat: Added forge CLI
 - Feat: Added forge base commands
 - Docs: Added PHP Docs
+- Feat: Added htaccess files
+- Feat: Added index in the root to prevent direct access
 
 ### v0.1.0
 - Feat: Initial Version
