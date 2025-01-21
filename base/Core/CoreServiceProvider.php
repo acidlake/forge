@@ -1,4 +1,5 @@
 <?php
+
 namespace Base\Core;
 
 use Base\Adapters\CustomRouter;
@@ -10,8 +11,24 @@ use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 use Base\Interfaces\ViewInterface;
 
+/**
+ * CoreServiceProvider class responsible for registering core services into the container.
+ *
+ * @framework Forge
+ * @author Jeremias Nunez
+ * @github acidlake
+ * @license MIT
+ * @copyright 2025
+ */
 class CoreServiceProvider extends ServiceProvider
 {
+    /**
+     * Registers core services into the dependency injection container.
+     *
+     * @param Container $container The dependency injection container instance.
+     *
+     * @return void
+     */
     public function register(Container $container): void
     {
         // Register the router
@@ -29,10 +46,7 @@ class CoreServiceProvider extends ServiceProvider
             // Create a Monolog instance with a StreamHandler
             $monolog = new Logger("app");
             $monolog->pushHandler(
-                new StreamHandler(
-                    __DIR__ . "/../../logs/app.log",
-                    Logger::DEBUG
-                )
+                new StreamHandler(BASE_PATH . "/logs/app.log", Logger::DEBUG)
             );
 
             // Return the MonologAdapter with the Monolog instance

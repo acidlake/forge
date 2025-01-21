@@ -4,8 +4,33 @@ namespace Base\Templates\SyntaxHandlers;
 
 use Base\Interfaces\SyntaxHandlerInterface;
 
+/**
+ * PartialHandler processes `{#include}` syntax for including and rendering partial templates.
+ *
+ * Handles `{#include "template.path" with {params}}` syntax to include partial templates,
+ * allowing dynamic parameters to be passed.
+ *
+ * @framework Forge
+ * @license MIT
+ * @github acidlake
+ * @autor Jeremias
+ * @copyright 2025
+ */
 class PartialHandler implements SyntaxHandlerInterface
 {
+    /**
+     * Process the template content to handle `{#include}` syntax for partials.
+     *
+     * Matches `{#include "template.path" with {params}}` syntax and replaces it with the rendered
+     * output of the specified partial template, passing the resolved parameters.
+     *
+     * @param string $content The template content to process.
+     * @param array  $data    An associative array of dynamic data for template rendering.
+     *
+     * @throws \RuntimeException If the specified partial template file does not exist.
+     *
+     * @return string The processed template content with partials rendered.
+     */
     public function process(string $content, array $data): string
     {
         return preg_replace_callback(

@@ -4,8 +4,31 @@ namespace Base\Templates\SyntaxHandlers;
 
 use Base\Interfaces\SyntaxHandlerInterface;
 
+/**
+ * EachHandler processes custom template syntax for iterating collections.
+ *
+ * Handles `{#each}` blocks in templates, with optional support for fallback
+ * content using `{:noitems}` when the collection is empty.
+ *
+ * @framework Forge
+ * @license MIT
+ * @author Jeremias
+ * @github acidlake
+ * @copyright 2025
+ */
 class EachHandler implements SyntaxHandlerInterface
 {
+    /**
+     * Process the template content to handle `{#each}` blocks.
+     *
+     * Converts `{#each}` blocks into PHP `foreach` loops, supporting optional
+     * fallback content with `{:noitems}` for empty collections.
+     *
+     * @param string $content The template content to process.
+     * @param array  $data    An associative array of dynamic data for template rendering.
+     *
+     * @return string The processed template content with `{#each}` blocks replaced by PHP code.
+     */
     public function process(string $content, array $data): string
     {
         // Handle {#each} blocks with {:noitems}
@@ -30,7 +53,11 @@ class EachHandler implements SyntaxHandlerInterface
                 );
                 $phpCode .= "<?php endforeach; ?>";
                 $phpCode .= "<?php else: ?>";
-                $phpCode .= $noItemsContent;
+                $phpCode .= str_replace(
+                    ["{{", "}}"],
+                    ["<?= ", "; ?>"],
+                    $noItemsContent
+                );
                 $phpCode .= "<?php endif; ?>";
 
                 return $phpCode;

@@ -2,12 +2,26 @@
 
 namespace Base\Tools;
 
+/**
+ * MiddlewareHelper provides a collection of reusable middleware for the Forge framework.
+ *
+ * This class includes various middleware to handle tasks like authentication, rate limiting,
+ * security headers, request logging, and more.
+ *
+ * @framework Forge
+ * @license MIT
+ * @github acidlake
+ * @author Jeremias
+ * @copyright 2025
+ */
 class MiddlewareHelper
 {
     /**
      * Middleware to set JSON response headers.
      *
-     * @return callable
+     * Ensures all responses have a `Content-Type: application/json` header.
+     *
+     * @return callable The middleware handler.
      */
     public static function jsonResponse(): callable
     {
@@ -20,9 +34,11 @@ class MiddlewareHelper
     }
 
     /**
-     * Middleware to set AUTHORIZATION headers.
+     * Middleware to enforce authentication using Authorization headers.
      *
-     * @return callable
+     * If the `Authorization` header is not present, the request is rejected with a 401 error.
+     *
+     * @return callable The middleware handler.
      */
     public static function auth(): callable
     {
@@ -39,9 +55,11 @@ class MiddlewareHelper
     }
 
     /**
-     * Middleware to set CORS  headers.
+     * Middleware to handle Cross-Origin Resource Sharing (CORS).
      *
-     * @return callable
+     * Adds headers to allow cross-origin requests from any origin.
+     *
+     * @return callable The middleware handler.
      */
     public static function cors(): callable
     {
@@ -55,9 +73,14 @@ class MiddlewareHelper
     }
 
     /**
-     * Middleware to set Circuit Breaker.
+     * Middleware for implementing a circuit breaker.
      *
-     * @return callable
+     * Limits service availability after a specified number of failures within a time window.
+     *
+     * @param int $maxFailures The maximum number of allowed failures.
+     * @param int $resetTime   The time window for resetting failure count, in seconds.
+     *
+     * @return callable The middleware handler.
      */
     public static function circuitBreaker(
         int $maxFailures,
@@ -97,19 +120,22 @@ class MiddlewareHelper
                 } catch (\Exception $e) {
                     $failureCount++;
                     $lastFailureTime = time();
-                    throw $e; // Re-throw the exception after recording the failure
+                    throw $e;
                 }
             };
         };
     }
 
     /**
-     * Middleware to set Rate Limit.
+     * Middleware to enforce rate limiting on incoming requests.
      *
-     * @param int $maxRequests Max allowed requests
-     * @param int $$windowSeconds Amount of seconds
+     * Limits the number of requests allowed from a single IP address within a specified time window.
+     * If the limit is exceeded, a 429 "Too Many Requests" error is returned.
      *
-     * @return callable
+     * @param int $maxRequests   The maximum number of allowed requests.
+     * @param int $windowSeconds The time window for rate limiting, in seconds.
+     *
+     * @return callable The middleware handler.
      */
     public static function rateLimit(
         int $maxRequests,
@@ -160,10 +186,16 @@ class MiddlewareHelper
     }
 
     /**
-     * Middleware to set Validate required fields in a request
-     * payload for spesific routes.
+     * Middleware to validate required fields in a request payload for specific routes.
      *
-     * @return callable
+     * Ensures that required fields are present and meet specified constraints such as
+     * minimum/maximum length or matching a regex pattern.
+     * If a validation rule fails, a 400 "Bad Request" error is returned with an error message.
+     *
+     * @param array $rules An associative array of validation rules, where each key is a field name
+     *                     and the value is an array of constraints (e.g., 'required', 'min', 'max', 'pattern').
+     *
+     * @return callable The middleware handler.
      */
     public static function validate(array $rules): callable
     {
@@ -235,9 +267,13 @@ class MiddlewareHelper
     }
 
     /**
-     * Middleware to set Log every request to a file.
+     * Middleware to log every incoming request to a specified log file.
      *
-     * @return callable
+     * Logs details such as the request method, URI, IP address, and timestamp.
+     *
+     * @param string $logFile The path to the log file where request details will be saved.
+     *
+     * @return callable The middleware handler.
      */
     public static function logRequests(string $logFile): callable
     {
@@ -261,9 +297,14 @@ class MiddlewareHelper
     }
 
     /**
-     * Middleware to set Whitelist Ip.
+     * Middleware to enforce an IP whitelist for accessing routes.
      *
-     * @return callable
+     * Only allows requests from specified IP addresses. If a request comes from an unauthorized IP,
+     * a 403 "Forbidden" error is returned.
+     *
+     * @param array $allowedIps An array of allowed IP addresses.
+     *
+     * @return callable The middleware handler.
      */
     public static function ipWhitelist(array $allowedIps): callable
     {
@@ -281,9 +322,14 @@ class MiddlewareHelper
     }
 
     /**
-     * Middleware to allow API Key Validation.
+     * Middleware to validate API key authentication.
      *
-     * @return callable
+     * Checks for the presence of a valid API key in the `X-API-KEY` header. If the key is missing or invalid,
+     * a 401 "Unauthorized" error is returned.
+     *
+     * @param string $expectedKey The expected API key for authentication.
+     *
+     * @return callable The middleware handler.
      */
     public static function apiKey(string $expectedKey): callable
     {
@@ -303,9 +349,12 @@ class MiddlewareHelper
     }
 
     /**
-     * Middleware to Compress the response using Gzip.
+     * Middleware to compress the response using Gzip.
      *
-     * @return callable
+     * Compresses the response output to reduce the size of data transferred to the client.
+     * Uses `ob_gzhandler` for compression.
+     *
+     * @return callable The middleware handler.
      */
     public static function compress(): callable
     {
@@ -320,9 +369,11 @@ class MiddlewareHelper
     }
 
     /**
-     * Middleware to set Common security headers to al response.
+     * Middleware to apply common security headers to all responses.
      *
-     * @return callable
+     * Sets headers such as `X-Content-Type-Options`, `X-Frame-Options`, and `X-XSS-Protection`.
+     *
+     * @return callable The middleware handler.
      */
     public static function securityHeaders(): callable
     {

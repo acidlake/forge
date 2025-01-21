@@ -8,6 +8,12 @@ use Base\Commands\HelpCommand;
 
 /**
  * CLI class for handling and managing commands.
+ *
+ * @framework Forge
+ * @author Jeremias Nunez
+ * @github acidlake
+ * @license MIT
+ * @copyright 2025
  */
 class CLI
 {
