@@ -1,3 +1,7 @@
+### v0.1.1
+- Feat: Added forge CLI
+- Feat: Added forge base commands
+
 ### v0.1.0
 - Feat: Initial Version
 - Feat: Added SyntaxHandlers
