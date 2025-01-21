@@ -35,5 +35,9 @@
 
         <a $attributes>Visit Example</a>
 
+        <!-- TODO: Add support for Helpershandlers to be used as template syntax {#if EnvHelper::isEnvironment->development}
+            <p>Development mode: Debugging enabled.</p>
+        {/if} -->
+
 </body>
 </html>
