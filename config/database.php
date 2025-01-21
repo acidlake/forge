@@ -28,7 +28,13 @@ return [
      */
     "default" => EnvHelper::get("DB_CONNECTION", "mysql"),
 
-    "key_strategy" => "uuid", // Options: 'uuid', 'auto_increment', 'custom'
+    "key_strategy" => "uuid", // Options: 'uuid', 'id', 'custom', 'nanoid', 'snowflake', 'short-hash', 'composite', 'timestamp', 'random-string'
+
+    "key_length" => 36, // Optional for UUID/NanoID
+
+    "orm" => [
+        "mode" => "document", // Oprions: 'document', 'relational'
+    ],
 
     /**
      * Database Connections

@@ -4,13 +4,16 @@ namespace Base\Core;
 
 use Base\Adapters\CustomRouter;
 use Base\Adapters\MonologAdapter;
+use Base\Database\BaseSchemaBuilder;
 use Base\Helpers\EnvHelper;
+use Base\Helpers\KeyGenerator;
 use Base\Interfaces\ConfigHelperInterface;
 use Base\Interfaces\ConfigurationManagerInterface;
-use Base\Interfaces\DatabaseInterface;
+use Base\Interfaces\KeyGeneratorInterface;
 use Base\Interfaces\LoggerInterface;
 use Base\Interfaces\ORMDatabaseAdapterInterface;
 use Base\Interfaces\RouterInterface;
+use Base\Interfaces\SchemaBuilderInterface;
 use Base\ORM\DatabaseAdapter;
 use Base\Templates\DefaultViewEngine;
 use Base\Tools\ConfigHelper;
@@ -105,6 +108,18 @@ class CoreServiceProvider extends ServiceProvider
             $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
             return new DatabaseAdapter($pdo);
+        });
+
+        // Register SchemaBuilder
+        $container->bind(SchemaBuilderInterface::class, function ($container) {
+            return new BaseSchemaBuilder(
+                $container->resolve(ORMDatabaseAdapterInterface::class)
+            );
+        });
+
+        // Register KeyGenerator
+        $container->bind(KeyGeneratorInterface::class, function () {
+            return new KeyGenerator();
         });
     }
 }

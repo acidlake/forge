@@ -2,6 +2,7 @@
 namespace Base\ORM;
 
 use Base\Core\ContainerAwareTrait;
+use Base\Interfaces\KeyGeneratorInterface;
 use Base\Interfaces\ORMDatabaseAdapterInterface;
 use Base\Traits\SoftDeletes;
 use Base\Traits\Timestamps;
@@ -13,13 +14,17 @@ abstract class BaseModel
     protected string $table = ""; // Database table
     protected string $key = "id"; // Primary key column
     protected array $fillable = []; // Columns allowed for mass assignment
+    protected string $keyStrategy = "id"; // Default strategy
+    protected int $keyLength = 36;
 
     private ORMDatabaseAdapterInterface $adapter;
+    private KeyGeneratorInterface $keyGenerator;
     private array $attributes = [];
 
     public function __construct()
     {
         $this->adapter = $this->resolve(ORMDatabaseAdapterInterface::class);
+        $this->keyGenerator = $this->resolve(KeyGeneratorInterface::class);
 
         foreach ($this->fillable as $property) {
             $this->attributes[$property] = null;
@@ -97,11 +102,24 @@ abstract class BaseModel
 
     public function save(): bool
     {
+        if (empty($this->{$this->key})) {
+            $this->{$this->key} = $this->generatePrimaryKey();
+        }
+
         return $this->adapter->save($this->table, $this->toArray(), $this->key);
     }
 
     public function delete(): bool
     {
         return $this->adapter->delete($this->table, $this->{$this->key});
+    }
+
+    public function generatePrimaryKey(): string
+    {
+        return $this->keyGenerator->generate(
+            $this->keyStrategy,
+            $this->keyLength,
+            $this->keyFields ?? []
+        );
     }
 }

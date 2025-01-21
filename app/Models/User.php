@@ -18,5 +18,8 @@ class User extends BaseModel
     protected string $table = "users"; // Name of the database table
     protected string $key = "id"; // Primary key for the table (UUID in this case)
 
+    protected string $storage = "relational";
+    protected string $keyStrategy = "auto-increment";
+
     protected array $fillable = ["id", "name"];
 }
