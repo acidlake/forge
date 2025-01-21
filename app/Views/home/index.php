@@ -16,9 +16,9 @@
         <pre>
             {print_r($posts)}
         </pre>
-
         {#if $isLoggedIn}
-        <p>Welcome back, {{ $user }}</p>
+        <!-- TODO: Add support for object type handlers -->
+        <p>Welcome back, {{ $user->name }}</p>
         {:else}
         <p>Please login</p>
         {/if}

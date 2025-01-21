@@ -7,8 +7,11 @@ use Base\Adapters\MonologAdapter;
 use Base\Helpers\EnvHelper;
 use Base\Interfaces\ConfigHelperInterface;
 use Base\Interfaces\ConfigurationManagerInterface;
+use Base\Interfaces\DatabaseInterface;
 use Base\Interfaces\LoggerInterface;
+use Base\Interfaces\ORMDatabaseAdapterInterface;
 use Base\Interfaces\RouterInterface;
+use Base\ORM\DatabaseAdapter;
 use Base\Templates\DefaultViewEngine;
 use Base\Tools\ConfigHelper;
 use Monolog\Logger;
@@ -83,6 +86,25 @@ class CoreServiceProvider extends ServiceProvider
         // Register default config helper
         $container->bind(ConfigHelperInterface::class, function () {
             return new ConfigHelper();
+        });
+
+        // Register database bindings
+        $container->bind(ORMDatabaseAdapterInterface::class, function () {
+            $dsn = sprintf(
+                "%s:host=%s;dbname=%s",
+                EnvHelper::get("DB_CONNECTION", "mysql"),
+                EnvHelper::get("DB_HOST", "127.0.0.1"),
+                EnvHelper::get("DB_DATABASE", "forge")
+            );
+
+            $pdo = new \PDO(
+                $dsn,
+                EnvHelper::get("DB_USERNAME", "root"),
+                EnvHelper::get("DB_PASSWORD", "")
+            );
+            $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+
+            return new DatabaseAdapter($pdo);
         });
     }
 }

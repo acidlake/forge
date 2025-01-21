@@ -28,6 +28,8 @@ return [
      */
     "default" => EnvHelper::get("DB_CONNECTION", "mysql"),
 
+    "key_strategy" => "uuid", // Options: 'uuid', 'auto_increment', 'custom'
+
     /**
      * Database Connections
      *
