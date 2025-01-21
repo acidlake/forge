@@ -6,6 +6,8 @@
 - Feat: Added index in the root to prevent direct access
 - Feat: Added configuration manager
 - Feat: Added Environment loader
+- Feat: Added option to load .env files
+- Feat: Added option to handle multiple environments
 
 ### v0.1.0
 - Feat: Initial Version
