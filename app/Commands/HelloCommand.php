@@ -18,7 +18,7 @@ class HelloCommand implements CommandInterface
 
     public function execute(array $arguments = []): void
     {
-        $name = $args[0] ?? "World";
-        echo "Hello, {$name}!" . PHP_EOL;
+        $name = $arguments[0] ?? "World";
+        echo "Hello, {$name}! \n";
     }
 }

@@ -18,6 +18,6 @@ class MigrateCommand implements CommandInterface
 
     public function execute(array $arguments = []): void
     {
-        echo "Migrate logic";
+        echo "Migrate logic \n";
     }
 }
