@@ -13,7 +13,7 @@ class HelloCommand implements CommandInterface
 
     public function getDescription(): string
     {
-        return "Starts the database migrations";
+        return "Example application command";
     }
 
     public function execute(array $arguments = []): void
