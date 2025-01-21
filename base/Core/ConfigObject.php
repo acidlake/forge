@@ -121,4 +121,18 @@ class ConfigObject implements ArrayAccess
     {
         throw new \RuntimeException("Configuration is immutable.");
     }
+
+    /**
+     * Convert the ConfigObject to an array.
+     *
+     * @return array The configuration data as an array.
+     */
+    public function toArray(): array
+    {
+        $result = [];
+        foreach ($this->data as $key => $value) {
+            $result[$key] = $value instanceof self ? $value->toArray() : $value;
+        }
+        return $result;
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace Base\Tools;
 
+use Base\Core\ConfigObject;
 use Base\Core\ContainerHelper;
 use Base\Interfaces\ConfigurationManagerInterface;
 use Base\Interfaces\ConfigHelperInterface;
@@ -21,7 +22,14 @@ class ConfigHelper implements ConfigHelperInterface
         );
 
         [$group, $key] = self::parseConfigKey($name);
-        return $configManager->get($group, $key);
+        $result = $configManager->get($group, $key);
+
+        // Automatically convert ConfigObject to an array if applicable
+        if ($result instanceof ConfigObject) {
+            return $result->toArray();
+        }
+
+        return $result;
     }
 
     /**
