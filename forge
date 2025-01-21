@@ -1,6 +1,24 @@
 #!/usr/bin/env php
 <?php
-define("BASE_PATH", __DIR__);
+/**
+ * Forge CLI Entry Point.
+ *
+ * This script serves as the command-line interface (CLI) entry point for the Forge framework.
+ * It allows developers to execute framework and application-specific commands using the `php forge` command.
+ *
+ * Example usage:
+ *   php forge <command> [arguments]
+ *
+ * @framework Forge
+ * @license MIT
+ * @github acidlake
+ * @author Jeremias
+ * @entrypoint CLI Entry Point
+ * @version 1.0.0
+ * @copyright 2025
+ */
+
+define("BASE_PATH", __DIR__); // Define the base path for the framework.
 
 require_once __DIR__ . "/base/Core/Autoloader.php";
 
@@ -10,7 +28,11 @@ use Base\Core\CLI;
 // Register the autoloader
 Autoloader::register();
 
-// Run the CLI handler
+/**
+ * Initialize and execute the CLI handler.
+ *
+ * The CLI class processes command-line arguments and executes the appropriate command.
+ */
 $cli = new CLI();
 $cli->handle($argv);
 
