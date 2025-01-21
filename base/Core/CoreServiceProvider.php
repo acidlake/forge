@@ -61,6 +61,8 @@ class CoreServiceProvider extends ServiceProvider
         });
 
         // Register default config helper
-        $container->bind(ConfigHelperInterface::class, ConfigHelper::class);
+        $container->bind(ConfigHelperInterface::class, function () {
+            return new ConfigHelper();
+        });
     }
 }
