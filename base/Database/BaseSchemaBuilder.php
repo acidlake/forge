@@ -22,12 +22,12 @@ class BaseSchemaBuilder implements SchemaBuilderInterface
         $this->adapter = $adapter;
     }
 
-    public function create(string $table, callable $callback): void
+    public function create(string $table, callable $blueprint): void
     {
-        $blueprint = new SchemaBlueprint($table);
-        $callback($blueprint);
+        $schema = new SchemaBlueprint($table);
+        $blueprint($schema);
 
-        $sql = $blueprint->toSql();
+        $sql = $schema->toSql();
         $this->adapter->query($sql);
     }
 
@@ -43,12 +43,12 @@ class BaseSchemaBuilder implements SchemaBuilderInterface
         $this->adapter->query($sql);
     }
 
-    public function table(string $table, callable $callback): void
+    public function table(string $table, callable $blueprint): void
     {
-        $blueprint = new SchemaBlueprint($table, true);
-        $callback($blueprint);
+        $schema = new SchemaBlueprint($table, true);
+        $blueprint($schema);
 
-        $sql = $blueprint->toSql();
+        $sql = $schema->toSql();
         $this->adapter->query($sql);
     }
 }

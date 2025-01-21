@@ -9,23 +9,23 @@ use Base\Interfaces\CommandInterface;
 use Base\Interfaces\ORMDatabaseAdapterInterface;
 use Base\Interfaces\SchemaBuilderInterface;
 
-class MigrateCommand implements CommandInterface
+class RollBackCommand implements CommandInterface
 {
     use ContainerAwareTrait;
 
     public function getName(): string
     {
-        return "migrate";
+        return "migrate:rollback";
     }
 
     public function getDescription(): string
     {
-        return "Run all pending migrations.";
+        return "Rollback the last migration batch..";
     }
 
     public function execute(array $arguments = []): void
     {
-        echo "Running migrations...\n";
+        echo "Rolling back the last migration batch...\n";
 
         // Resolve the database adapter
         $adapter = $this->resolve(ORMDatabaseAdapterInterface::class);
@@ -47,12 +47,13 @@ class MigrateCommand implements CommandInterface
                 $adapter,
                 new BaseSchemaBuilder($adapter)
             );
-            $migration->up();
+
+            $migration->down();
 
             // Record migration in the migrations table
             $adapter->query(
-                "INSERT INTO migrations (migration, batch) VALUES (?, ?)",
-                [$migrationClass, $this->getCurrentBatch($adapter)]
+                "DELETE FROM migrations WHERE migration = :migration",
+                ["migration" => $migrationClass]
             );
             echo "Migrated: {$migrationClass}\n";
         }

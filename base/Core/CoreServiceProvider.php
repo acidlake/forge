@@ -112,9 +112,8 @@ class CoreServiceProvider extends ServiceProvider
 
         // Register SchemaBuilder
         $container->bind(SchemaBuilderInterface::class, function ($container) {
-            return new BaseSchemaBuilder(
-                $container->resolve(ORMDatabaseAdapterInterface::class)
-            );
+            $adapter = $container->resolve(ORMDatabaseAdapterInterface::class);
+            return new BaseSchemaBuilder($adapter);
         });
 
         // Register KeyGenerator

@@ -15,6 +15,7 @@ class SchemaBlueprint
     private bool $modify = false;
     private array $columns = [];
     private array $constraints = [];
+    private bool $nullable = false;
 
     public function __construct(string $table, bool $modify = false)
     {

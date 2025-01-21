@@ -11,11 +11,8 @@ namespace Base\Interfaces;
  */
 interface SchemaBuilderInterface
 {
-    public function create(string $table, callable $callback): void;
-
+    public function create(string $table, callable $blueprint): void;
     public function drop(string $table): void;
-
     public function dropIfExists(string $table): void;
-
-    public function table(string $table, callable $callback): void;
+    public function table(string $table, callable $blueprint): void;
 }
