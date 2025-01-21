@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Templates;
+namespace Base\Interfaces;
 
 interface SyntaxHandlerInterface
 {

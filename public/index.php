@@ -11,7 +11,7 @@ use Base\Core\ContainerHelper;
 use Base\Core\ProviderLoader;
 use Base\Core\CoreServiceProvider;
 use Base\Core\RouteLoader;
-use Base\Core\RouterInterface;
+use Base\Interfaces\RouterInterface;
 use Base\Tools\InternalRoutes;
 
 // Get DI Container

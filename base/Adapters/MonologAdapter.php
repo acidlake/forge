@@ -2,7 +2,7 @@
 
 namespace Base\Adapters;
 
-use Base\Core\LoggerInterface;
+use Base\Interfaces\LoggerInterface;
 use Monolog\Logger;
 
 class MonologAdapter implements LoggerInterface

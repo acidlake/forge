@@ -3,10 +3,12 @@ namespace Base\Core;
 
 use Base\Adapters\CustomRouter;
 use Base\Adapters\MonologAdapter;
+use Base\Interfaces\LoggerInterface;
+use Base\Interfaces\RouterInterface;
 use Base\Templates\DefaultViewEngine;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
-use Base\Core\ViewInterface;
+use Base\Interfaces\ViewInterface;
 
 class CoreServiceProvider extends ServiceProvider
 {

@@ -1,5 +1,5 @@
 <?php
-use Base\Core\RouterInterface;
+use Base\Interfaces\RouterInterface;
 use Base\Tools\MiddlewareHelper;
 
 return function (RouterInterface $router) {

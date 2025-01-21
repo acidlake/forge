@@ -1,6 +1,8 @@
 <?php
 namespace Base\Core;
 
+use Base\Interfaces\RouterInterface;
+
 class RouteLoader
 {
     /**

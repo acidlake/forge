@@ -3,8 +3,8 @@ namespace App\Routes;
 
 use App\Controllers\HomeController;
 use Base\Core\ContainerHelper;
-use Base\Core\RouterInterface;
-use Base\Core\ViewInterface;
+use Base\Interfaces\RouterInterface;
+use Base\Interfaces\ViewInterface;
 
 return function (RouterInterface $router) {
     /** @var ViewInterface $view */

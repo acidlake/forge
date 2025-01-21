@@ -2,7 +2,7 @@
 
 namespace Base\Adapters;
 
-use Base\Core\RouterInterface;
+use Base\Interfaces\RouterInterface;
 
 class CustomRouter implements RouterInterface
 {

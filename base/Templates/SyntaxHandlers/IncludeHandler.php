@@ -2,8 +2,8 @@
 
 namespace Base\Templates\SyntaxHandlers;
 
-use Base\Core\ViewInterface;
-use Base\Templates\SyntaxHandlerInterface;
+use Base\Interfaces\ViewInterface;
+use Base\Interfaces\SyntaxHandlerInterface;
 
 class IncludeHandler implements SyntaxHandlerInterface
 {

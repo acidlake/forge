@@ -2,7 +2,7 @@
 
 namespace Base\Templates\SyntaxHandlers;
 
-use Base\Templates\SyntaxHandlerInterface;
+use Base\Interfaces\SyntaxHandlerInterface;
 
 class FunctionHandler implements SyntaxHandlerInterface
 {

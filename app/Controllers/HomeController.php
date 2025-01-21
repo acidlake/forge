@@ -3,7 +3,7 @@
 namespace App\Controllers;
 
 use Base\Core\ContainerHelper;
-use Base\Core\ViewInterface;
+use Base\Interfaces\ViewInterface;
 
 class HomeController
 {

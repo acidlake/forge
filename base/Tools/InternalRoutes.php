@@ -1,7 +1,7 @@
 <?php
 namespace Base\Tools;
 
-use Base\Core\RouterInterface;
+use Base\Interfaces\RouterInterface;
 
 class InternalRoutes
 {

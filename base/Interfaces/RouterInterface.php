@@ -1,5 +1,5 @@
 <?php
-namespace Base\Core;
+namespace Base\Interfaces;
 
 interface RouterInterface
 {
