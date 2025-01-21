@@ -1,32 +1,35 @@
 <?php
+
 namespace Base\Core;
 
-use Base\Interfaces\ConfigManagerInterface;
+use Base\Interfaces\ConfigurationManagerInterface;
 
-class ConfigurationManager implements ConfigManagerInterface
+class ConfigurationManager implements ConfigurationManagerInterface
 {
     private array $configs = [];
 
-    public function __construct()
-    {
-        $this->loadConfigs(BASE_PATH . "/base/config", "Base");
-        $this->loadConfigs(BASE_PATH . "/app/config", "App");
+    public function __construct(
+        string $frameworkConfigPath,
+        string $appConfigPath = null
+    ) {
+        $this->loadConfigs($frameworkConfigPath);
+
+        if ($appConfigPath !== null && is_dir($appConfigPath)) {
+            $this->loadConfigs($appConfigPath, true); // Load app configs to override
+        }
     }
 
-    private function loadConfigs(string $path, string $namespace): void
+    private function loadConfigs(string $path, bool $override = false): void
     {
-        if (!is_dir($path)) {
-            return;
-        }
-
         foreach (glob("{$path}/*.php") as $file) {
             $configName = basename($file, ".php");
             $configData = require $file;
 
-            if (!isset($this->configs[$configName])) {
+            if (!isset($this->configs[$configName]) || $override) {
                 $this->configs[$configName] = [];
             }
 
+            // Merge framework configs with app configs, prioritizing app configs
             $this->configs[$configName] = array_merge(
                 $this->configs[$configName],
                 $configData

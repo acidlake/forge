@@ -5,6 +5,7 @@ namespace Base\Core;
 use Base\Adapters\CustomRouter;
 use Base\Adapters\MonologAdapter;
 use Base\Interfaces\ConfigHelperInterface;
+use Base\Interfaces\ConfigurationManagerInterface;
 use Base\Interfaces\LoggerInterface;
 use Base\Interfaces\RouterInterface;
 use Base\Templates\DefaultViewEngine;
@@ -58,6 +59,18 @@ class CoreServiceProvider extends ServiceProvider
         // Register default view engine
         $container->bind(ViewInterface::class, function () {
             return new DefaultViewEngine(VIEW_PATH);
+        });
+
+        // Register the ConfigManager
+        $container->bind(ConfigurationManagerInterface::class, function () {
+            return new ConfigurationManager(CONFIG_PATH);
+        });
+
+        $container->bind(ConfigurationManagerInterface::class, function () {
+            return new ConfigurationManager(
+                CORE_CONFIG_PATH, // Framework config path
+                APP_CONFIG_PATH // Application config path
+            );
         });
 
         // Register default config helper

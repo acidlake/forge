@@ -2,7 +2,8 @@
 
 namespace App\Controllers;
 
-use Base\Core\ContainerHelper;
+use Base\Core\ContainerAwareTrait;
+use Base\Interfaces\ConfigHelperInterface;
 use Base\Interfaces\ViewInterface;
 
 /**
@@ -20,6 +21,7 @@ use Base\Interfaces\ViewInterface;
  */
 class HomeController
 {
+    use ContainerAwareTrait;
     /**
      * Handle the request to the home page.
      *
@@ -30,11 +32,18 @@ class HomeController
     public function index(): string
     {
         /**
+         * Resolve the ConfigHelperInterface instance from the DI container.
+         *
+         * @var ConfigHelperInterface $config
+         */
+        $config = $this->resolve(ConfigHelperInterface::class);
+
+        /**
          * Resolve the ViewInterface instance from the DI container.
          *
          * @var ViewInterface $view
          */
-        $view = ContainerHelper::getContainer()->resolve(ViewInterface::class);
+        $view = $this->resolve(ViewInterface::class);
 
         /**
          * Example list of posts to display on the homepage.
@@ -77,6 +86,10 @@ class HomeController
             "posts" => $posts,
             "attributes" => $attributes,
         ];
+
+        print $config->get("app.name");
+        print $config->get("app.version");
+        print $config->get("app.environment");
 
         // Render the view template with the prepared data
         return $view->render("home.index", $data);

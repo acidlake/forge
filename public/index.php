@@ -14,6 +14,8 @@
 
 define("BASE_PATH", dirname(__DIR__)); // Define the base path for the application.
 define("VIEW_PATH", BASE_PATH . "/app/Views/"); // Define the path for view templates.
+define("CORE_CONFIG_PATH", BASE_PATH . "/config/"); // Define the path for configuration files.
+define("APP_CONFIG_PATH", BASE_PATH . "/app/config/");
 
 // Autoload framework and application classes
 require_once "../base/Core/Autoloader.php";

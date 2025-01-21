@@ -2,7 +2,7 @@
 
 namespace Base\Interfaces;
 
-interface ConfigManagerInterface
+interface ConfigurationManagerInterface
 {
     /**
      * Get a configuration group.
