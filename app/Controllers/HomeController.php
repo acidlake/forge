@@ -6,6 +6,7 @@ use Base\Core\ContainerAwareTrait;
 use Base\Interfaces\ConfigHelperInterface;
 use Base\Interfaces\JWTInterface;
 use Base\Interfaces\OTPManagerInterface;
+use Base\Interfaces\StorageManagerInterface;
 use Base\Interfaces\ViewInterface;
 use Base\Helpers\EnvHelper;
 use App\Models\User;
@@ -90,6 +91,15 @@ class HomeController
         }
         echo "<br />";
         echo "<br />";
+
+        /**
+         * @var StorageManagerInterface $storage
+         */
+        $key = "otp:{$user}";
+        $storage = $this->resolve(StorageManagerInterface::class);
+        $storage->set($key, $otp, 300);
+        echo "Saved to storage";
+        print $storage->get($key);
 
         /**
          * Example list of posts to display on the homepage.
