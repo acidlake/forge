@@ -1,3 +1,6 @@
+### v0.1.2
+-
+
 ### v0.1.1
 - Feat: Added forge CLI
 - Feat: Added forge base commands
