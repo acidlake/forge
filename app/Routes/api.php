@@ -1,5 +1,6 @@
 <?php
 
+use App\Controllers\Api\UserController;
 use Base\Interfaces\RouterInterface;
 
 /**
@@ -62,5 +63,7 @@ return function (RouterInterface $router) {
         $router->post("/data", function () {
             echo json_encode(["message" => "Data created successfully"]);
         });
+
+        $router->get("/users", [UserController::class, "index"]);
     });
 };

@@ -9,10 +9,13 @@ use Base\Authentication\JWT\JWT;
 use Base\Authentication\OTP\Adapters\EmailAdapter;
 use Base\Authentication\OTP\Adapters\GoogleAuthenticatorAdapter;
 use Base\Authentication\OTP\OTPManager;
+use Base\Controllers\BaseApiController;
 use Base\Database\BaseSchemaBuilder;
 use Base\Helpers\EnvHelper;
 use Base\Helpers\EnvValueParser;
 use Base\Helpers\KeyGenerator;
+use Base\Helpers\ModelSerializerHelper;
+use Base\Interfaces\BaseApiControllerInterface;
 use Base\Interfaces\ConfigHelperInterface;
 use Base\Interfaces\ConfigurationManagerInterface;
 use Base\Interfaces\EnvValueParserInterface;
@@ -20,6 +23,7 @@ use Base\Interfaces\JWTInterface;
 use Base\Interfaces\JWTMiddlewareInterface;
 use Base\Interfaces\KeyGeneratorInterface;
 use Base\Interfaces\LoggerInterface;
+use Base\Interfaces\ModelSerializerHelperInterface;
 use Base\Interfaces\NotificationManagerInterface;
 use Base\Interfaces\ORMDatabaseAdapterInterface;
 use Base\Interfaces\OTPDeliveryAdapterInterface;
@@ -251,6 +255,16 @@ class CoreServiceProvider extends ServiceProvider
         // to avoid adding every helper apart
         $container->bind(EnvValueParserInterface::class, function () {
             return new EnvValueParser();
+        });
+
+        // Base API Controller
+        $container->bind(BaseApiControllerInterface::class, function () {
+            return new BaseApiController();
+        });
+
+        // Model Serializer
+        $container->bind(ModelSerializerHelperInterface::class, function () {
+            return new ModelSerializerHelper();
         });
     }
 }
