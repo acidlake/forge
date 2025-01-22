@@ -18,6 +18,10 @@ define("CORE_CONFIG_PATH", BASE_PATH . "/config/"); // Define the path for frame
 define("APP_CONFIG_PATH", BASE_PATH . "/app/config/"); // Define the path for application configuration files.
 define("ENV_PATH", BASE_PATH . "/.env"); // Path to .env file
 
+// Load the .env file
+require_once "../base/Tools/EnvLoader.php";
+Base\Tools\EnvLoader::load(ENV_PATH);
+
 // Autoload framework and application classes
 require_once "../base/Core/Autoloader.php";
 Base\Core\Autoloader::register();

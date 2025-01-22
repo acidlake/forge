@@ -6,6 +6,7 @@ use Base\Core\ContainerAwareTrait;
 use Base\Interfaces\ConfigHelperInterface;
 use Base\Interfaces\ViewInterface;
 use Base\Helpers\EnvHelper;
+use App\Models\User;
 
 /**
  * HomeController handles the rendering of the homepage.
@@ -46,6 +47,9 @@ class HomeController
          */
         $view = $this->resolve(ViewInterface::class);
 
+        //
+        $user = User::find(1);
+
         /**
          * Example list of posts to display on the homepage.
          *
@@ -83,9 +87,9 @@ class HomeController
             "frameworkName" => "Forge",
             "message" => "Welcome to the Forge framework!",
             "isLoggedIn" => true,
-            "user" => "Forge",
             "posts" => $posts,
             "attributes" => $attributes,
+            "user" => $user,
         ];
 
         if (EnvHelper::is("development")) {
@@ -97,6 +101,10 @@ class HomeController
         }
 
         print_r($config->get("environment.supported"));
+
+        echo "<pre>";
+        print_r($user);
+        echo "</pre>";
 
         // Render the view template with the prepared data
         return $view->render("home.index", $data);

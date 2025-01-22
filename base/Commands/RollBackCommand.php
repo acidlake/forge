@@ -1,25 +1,26 @@
 <?php
+
 namespace Base\Commands;
 
 use Base\Database\MigrationManager;
 use Base\Interfaces\CommandInterface;
 
-class MigrateCommand implements CommandInterface
+class RollbackCommand implements CommandInterface
 {
     public function getName(): string
     {
-        return "migrate";
+        return "rollback";
     }
 
     public function getDescription(): string
     {
-        return "Run database migrations to create or update tables.";
+        return "Rollback the last batch of migrations.";
     }
 
     public function execute(array $arguments = []): void
     {
         $migrationManager = new MigrationManager();
-        $migrationManager->migrate();
-        echo "Migrations completed successfully.\n";
+        $migrationManager->rollback();
+        echo "Rollback completed successfully.\n";
     }
 }
