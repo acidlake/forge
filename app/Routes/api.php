@@ -65,5 +65,7 @@ return function (RouterInterface $router) {
         });
 
         $router->get("/users", [UserController::class, "index"]);
+
+        $router->post("/users", [UserController::class, "store"]);
     });
 };

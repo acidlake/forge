@@ -1,7 +1,9 @@
 <?php
 namespace Base\Router\Http;
 
+use Base\Exceptions\ValidationException;
 use Base\Interfaces\RequestInterface;
+use Base\Validations\Validator;
 
 class Request implements RequestInterface
 {
@@ -20,10 +22,14 @@ class Request implements RequestInterface
         $this->query = $_GET;
 
         // Parse body (JSON or form-data)
-        $this->body =
-            $_SERVER["CONTENT_TYPE"] === "application/json"
-                ? json_decode(file_get_contents("php://input"), true) ?? []
-                : $_POST;
+        $contentType = $_SERVER["CONTENT_TYPE"] ?? "";
+        if ($contentType === "application/json") {
+            $this->body =
+                json_decode(file_get_contents("php://input"), true) ?? [];
+        } else {
+            // Default to $_POST for form data or other methods
+            $this->body = $_POST;
+        }
 
         // Capture method and URI
         $this->method = $_SERVER["REQUEST_METHOD"];
@@ -47,10 +53,36 @@ class Request implements RequestInterface
     }
 
     /**
+     * Get the entire body or a specific body parameter.
+     */
+    public function body(?string $key = null, $default = null): mixed
+    {
+        if ($key === null) {
+            return $this->body;
+        }
+        return $this->body[$key] ?? $default;
+    }
+
+    /**
      * Get a specific body parameter.
      */
     public function input(string $key, $default = null): mixed
     {
         return $this->body[$key] ?? $default;
+    }
+
+    /**
+     * Validate the request data against the given rules.
+     */
+    public function validate(array $rules): array
+    {
+        $validator = new Validator($this->body);
+        $validated = $validator->validate($rules);
+
+        if ($validated->fails()) {
+            throw new ValidationException($validated->errors());
+        }
+
+        return $validated->getData();
     }
 }

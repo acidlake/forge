@@ -16,4 +16,5 @@ interface BaseApiControllerInterface
     ): array;
 
     public function validationError(array $errors): array;
+    public function handleValidation($callback);
 }

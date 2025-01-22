@@ -7,6 +7,7 @@ use Base\Interfaces\ConfigHelperInterface;
 use Base\Interfaces\EnvValueParserInterface;
 use Base\Interfaces\RouterInterface;
 use Base\Tools\MiddlewareHelper;
+use Base\Router\Http\Request;
 
 /**
  * CustomRouter provides a lightweight routing system for the Forge framework.
@@ -137,6 +138,12 @@ class CustomRouter implements RouterInterface
                 foreach (array_reverse($route["middleware"]) as $middleware) {
                     $handler = $middleware($handler);
                 }
+
+                //Create a Request instance
+                $request = $this->createRequest();
+
+                // Append the request to the parameters
+                array_unshift($route["params"], $request);
 
                 $response = call_user_func_array($handler, $route["params"]);
 
@@ -303,5 +310,21 @@ class CustomRouter implements RouterInterface
 
             $this->routes = array_merge($originalRoutes, $this->routes);
         });
+    }
+
+    /**
+     * Create a Request instance from global variables.
+     *
+     * @return Request
+     */
+    private function createRequest(): Request
+    {
+        return new Request(
+            $_GET, // Query parameters
+            $_POST, // Request body
+            $_FILES, // Uploaded files
+            $_COOKIE, // Cookies
+            $_SERVER // Server data
+        );
     }
 }

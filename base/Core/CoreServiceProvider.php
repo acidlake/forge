@@ -28,6 +28,8 @@ use Base\Interfaces\NotificationManagerInterface;
 use Base\Interfaces\ORMDatabaseAdapterInterface;
 use Base\Interfaces\OTPDeliveryAdapterInterface;
 use Base\Interfaces\OTPManagerInterface;
+use Base\Interfaces\RequestInterface;
+use Base\Interfaces\ResponseInterface;
 use Base\Interfaces\RouterInterface;
 use Base\Interfaces\SchemaBuilderInterface;
 use Base\Interfaces\StorageManagerInterface;
@@ -36,6 +38,8 @@ use Base\Notifications\Drivers\PushDriver;
 use Base\Notifications\Drivers\SMSDriver;
 use Base\Notifications\NotificationManager;
 use Base\ORM\DatabaseAdapter;
+use Base\Router\Http\Request;
+use Base\Router\Http\Response;
 use Base\Storage\Drivers\DatabaseStorageDriver;
 use Base\Storage\Drivers\FileStorageDriver;
 use Base\Storage\Drivers\RedisStorageDriver;
@@ -266,5 +270,25 @@ class CoreServiceProvider extends ServiceProvider
         $container->bind(ModelSerializerHelperInterface::class, function () {
             return new ModelSerializerHelper();
         });
+
+        // Request
+        $container->bind(
+            RequestInterface::class,
+            AdapterResolver::resolve(
+                RequestInterface::class,
+                Request::class,
+                "App\\Adapters\\Response"
+            )
+        );
+
+        // Response
+        $container->bind(
+            ResponseInterface::class,
+            AdapterResolver::resolve(
+                ResponseInterface::class,
+                Response::class,
+                "App\\Adapters\\Response"
+            )
+        );
     }
 }

@@ -3,9 +3,13 @@ namespace App\Controllers\Api;
 
 use App\Models\User;
 use Base\Controllers\BaseApiController;
+use Base\Core\ContainerAwareTrait;
+use Base\Interfaces\RequestInterface as Request;
 
 class UserController extends BaseApiController
 {
+    use ContainerAwareTrait;
+
     public function index(): array
     {
         /**
@@ -16,16 +20,18 @@ class UserController extends BaseApiController
         return $this->success($users, "User list retrieved");
     }
 
-    public function store(): array
+    public function store(Request $request): array
     {
-        // $data = request()->validate([
-        //     "name" => "required|string",
-        //     "email" => "required|email|unique:users",
-        //     "password" => "required|min:8",
-        // ]);
+        $data = $this->handleValidation(function () use ($request) {
+            return $request->validate([
+                "name" => "required|string|min:4",
+            ]);
+        });
 
-        // $user = User::new($data);
+        $user = new User();
+        $user->fill($data);
+        $user->save();
 
-        //return $this->success($user, "User created successfully");
+        return $this->success($user, "User created successfully");
     }
 }
