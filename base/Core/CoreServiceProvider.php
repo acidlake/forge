@@ -185,9 +185,7 @@ class CoreServiceProvider extends ServiceProvider
             */
             $configHelper = $this->resolve(ConfigHelperInterface::class);
             $configSession = $configHelper::get("storage.session");
-            $driver = $configSession->driver;
-
-            print $driver;
+            $driver = $configSession["driver"];
 
             switch ($driver) {
                 case "redis":
@@ -208,7 +206,7 @@ class CoreServiceProvider extends ServiceProvider
                     return new DatabaseStorageDriver($pdo);
 
                 default:
-                    return new FileStorageDriver($configSession->path);
+                    return new FileStorageDriver($configSession["path"]);
             }
         });
     }
