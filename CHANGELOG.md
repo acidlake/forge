@@ -1,5 +1,5 @@
 ### v0.1.2
--
+- Feat: Added Storage Support
 
 ### v0.1.1
 - Feat: Added forge CLI

@@ -34,6 +34,7 @@ use Base\Tools\JWTMiddleware;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 use Base\Interfaces\ViewInterface;
+use PDO;
 
 /**
  * CoreServiceProvider class responsible for registering core services into the container.
@@ -198,7 +199,7 @@ class CoreServiceProvider extends ServiceProvider
                 // return new RedisStorageDriver($redis);
 
                 case "database":
-                    $pdo = new \PDO(
+                    $pdo = new PDO(
                         EnvHelper::get("DB_DSN"),
                         EnvHelper::get("DB_USERNAME"),
                         EnvHelper::get("DB_PASSWORD")
