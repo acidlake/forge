@@ -43,6 +43,7 @@ MAIL_ENCRYPTION="tls" # Options: tls, ssl, none
 # The log channel to use
 LOG_CHANNEL="daily" # Options: single, daily, syslog, errorlog
 LOG_PATH="storage/logs" # The path where log files will be stored
+LOG_LEVEL="debug"
 
 # ====================================
 # Security Configuration
