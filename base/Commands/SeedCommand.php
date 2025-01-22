@@ -3,7 +3,6 @@ namespace Base\Commands;
 
 use Base\Database\BaseSeeder;
 use Base\Interfaces\CommandInterface;
-use Base\Interfaces\SeederInterface;
 
 class SeedCommand implements CommandInterface
 {

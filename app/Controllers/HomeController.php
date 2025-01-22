@@ -4,6 +4,8 @@ namespace App\Controllers;
 
 use Base\Core\ContainerAwareTrait;
 use Base\Interfaces\ConfigHelperInterface;
+use Base\Interfaces\JWTInterface;
+use Base\Interfaces\OTPManagerInterface;
 use Base\Interfaces\ViewInterface;
 use Base\Helpers\EnvHelper;
 use App\Models\User;
@@ -49,6 +51,45 @@ class HomeController
 
         //
         $user = User::find(1);
+
+        /**
+         * @var JWTInterface $jwt
+         */
+        $jwt = $this->resolve(JWTInterface::class);
+        $token =
+            "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJuYW1lIjoicGVyZXoifQ.agPRwGf2kdciEIfR4LeA5E71g_np4f87hO52KdX5IT8";
+        $secretKey = "your-256-bit-secret";
+        $algorithm = "HS256";
+        $payload = ["name" => "perez"];
+
+        print_r(
+            $jwt::decode(
+                token: $token,
+                secretKey: $secretKey,
+                algorithm: $algorithm
+            )
+        );
+
+        echo "<br />";
+        echo "Generating OTP";
+        echo "<br />";
+        /**
+         * @var OTPManagerInterface $otpManager
+         */
+        $user = "jeremias2@gmail.com";
+        $otpManager = $this->resolve(OTPManagerInterface::class);
+        $otp = $otpManager->generateOTP($user);
+        print $otp;
+        $otpManager->sendOTP($user, $otp);
+        echo "TODO: Implement OTPManager validateOTP method";
+        $isValid = $otpManager->validateOTP($user, "02329");
+        if ($isValid) {
+            echo "OTP Valid";
+        } else {
+            echo "OTP Not valid";
+        }
+        echo "<br />";
+        echo "<br />";
 
         /**
          * Example list of posts to display on the homepage.

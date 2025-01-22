@@ -4,19 +4,29 @@ namespace Base\Core;
 
 use Base\Adapters\CustomRouter;
 use Base\Adapters\MonologAdapter;
+use Base\Authentication\Adapters\SmsTwillioAdapter;
+use Base\Authentication\JWT\JWT;
+use Base\Authentication\OTP\Adapters\EmailAdapter;
+use Base\Authentication\OTP\Adapters\GoogleAuthenticatorAdapter;
+use Base\Authentication\OTP\OTPManager;
 use Base\Database\BaseSchemaBuilder;
 use Base\Helpers\EnvHelper;
 use Base\Helpers\KeyGenerator;
 use Base\Interfaces\ConfigHelperInterface;
 use Base\Interfaces\ConfigurationManagerInterface;
+use Base\Interfaces\JWTInterface;
+use Base\Interfaces\JWTMiddlewareInterface;
 use Base\Interfaces\KeyGeneratorInterface;
 use Base\Interfaces\LoggerInterface;
 use Base\Interfaces\ORMDatabaseAdapterInterface;
+use Base\Interfaces\OTPDeliveryAdapterInterface;
+use Base\Interfaces\OTPManagerInterface;
 use Base\Interfaces\RouterInterface;
 use Base\Interfaces\SchemaBuilderInterface;
 use Base\ORM\DatabaseAdapter;
 use Base\Templates\DefaultViewEngine;
 use Base\Tools\ConfigHelper;
+use Base\Tools\JWTMiddleware;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 use Base\Interfaces\ViewInterface;
@@ -32,6 +42,7 @@ use Base\Interfaces\ViewInterface;
  */
 class CoreServiceProvider extends ServiceProvider
 {
+    use ContainerAwareTrait;
     /**
      * Registers core services into the dependency injection container.
      *
@@ -45,6 +56,11 @@ class CoreServiceProvider extends ServiceProvider
         $container->bind(EnvHelper::class, function () {
             EnvHelper::initialize();
             return new EnvHelper();
+        });
+
+        // Register default config helper
+        $container->bind(ConfigHelperInterface::class, function () {
+            return new ConfigHelper();
         });
 
         // Register the router
@@ -77,6 +93,29 @@ class CoreServiceProvider extends ServiceProvider
             return new DefaultViewEngine(VIEW_PATH);
         });
 
+        // Register JWT
+        $container->bind(JWTInterface::class, function () {
+            return new JWT();
+        });
+
+        $container->bind(JWTMiddlewareInterface::class, function () {
+            /**
+             * @var JWTInterface $jwtManager
+             */
+            $jwtManager = $this->resolve(JWTInterface::class);
+            return new JWTMiddleware(jwtManager: $jwtManager);
+        });
+
+        // OTP Manager
+        $container->bind(OTPManagerInterface::class, function () {
+            /**
+            @var ConfigHelperInterface $configHelper
+            */
+            $configHelper = $this->resolve(ConfigHelperInterface::class);
+            $config = $configHelper::get("auth");
+            return new OTPManager(config: $config);
+        });
+
         // Register the ConfigManager
         $container->bind(ConfigurationManagerInterface::class, function () {
             return new ConfigurationManager(
@@ -84,11 +123,6 @@ class CoreServiceProvider extends ServiceProvider
                 APP_CONFIG_PATH,
                 ENV_PATH
             );
-        });
-
-        // Register default config helper
-        $container->bind(ConfigHelperInterface::class, function () {
-            return new ConfigHelper();
         });
 
         // Register database bindings
@@ -112,6 +146,9 @@ class CoreServiceProvider extends ServiceProvider
 
         // Register SchemaBuilder
         $container->bind(SchemaBuilderInterface::class, function ($container) {
+            /**
+            @var ORMDatabaseAdapterInterface $adapter
+            */
             $adapter = $container->resolve(ORMDatabaseAdapterInterface::class);
             return new BaseSchemaBuilder($adapter);
         });
@@ -119,6 +156,22 @@ class CoreServiceProvider extends ServiceProvider
         // Register KeyGenerator
         $container->bind(KeyGeneratorInterface::class, function () {
             return new KeyGenerator();
+        });
+
+        /**
+         * OTP Base Adapters
+         */
+        // Email
+        $container->bind(OTPDeliveryAdapterInterface::class, function () {
+            return new EmailAdapter();
+        });
+        // Google
+        $container->bind(OTPDeliveryAdapterInterface::class, function () {
+            return new GoogleAuthenticatorAdapter();
+        });
+        // SMS
+        $container->bind(OTPDeliveryAdapterInterface::class, function () {
+            return new SmsTwillioAdapter();
         });
     }
 }

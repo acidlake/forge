@@ -2,12 +2,11 @@
 
 namespace Base\Core;
 
-use Base\Commands\ClearCommand;
+use Base\Commands\GenerateOTPCommand;
 use Base\Commands\ListCommand;
-use Base\Commands\ResetCommand;
-use Base\Commands\SeedCommand;
 use Base\Interfaces\CommandInterface;
 use Base\Commands\HelpCommand;
+use Base\Interfaces\OTPManagerInterface;
 
 /**
  * CLI class for handling and managing commands.
@@ -20,6 +19,8 @@ use Base\Commands\HelpCommand;
  */
 class CLI
 {
+    use ContainerAwareTrait;
+
     /**
      * List of registered commands.
      *
@@ -33,14 +34,16 @@ class CLI
      */
     public function __construct()
     {
+        /**
+         * @var OTPManagerInterface $otpManager
+         */
+        $otpManager = $this->resolve(OTPManagerInterface::class);
         $this->loadCoreCommands();
         $this->loadUserCommands();
 
         $this->commands["help"] = new HelpCommand($this);
         $this->commands["list"] = new ListCommand($this);
-        $this->commands["seed"] = new SeedCommand($this);
-        $this->commands["reset"] = new ResetCommand();
-        $this->commands["clear"] = new ClearCommand();
+        $this->commands["otp:generate"] = new GenerateOTPCommand($otpManager);
     }
 
     /**

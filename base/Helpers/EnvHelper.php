@@ -96,4 +96,54 @@ class EnvHelper
         }
         return $value ?: $default;
     }
+
+    /**
+     * Set or update an environment variable in the .env file.
+     *
+     * @param string $key The environment variable name.
+     * @param string $value The value to set for the variable.
+     *
+     * @return bool True on success, false on failure.
+     */
+    public function set(string $key, string $value): bool
+    {
+        if (!defined("ENV_PATH")) {
+            error_log("ENV_PATH constant is not defined.");
+            return false;
+        }
+
+        if (!file_exists(ENV_PATH) || !is_writable(ENV_PATH)) {
+            error_log(
+                "The .env file does not exist or is not writable at path: " .
+                    ENV_PATH
+            );
+            return false;
+        }
+
+        // Read the current contents of the .env file
+        $envContents = file(
+            ENV_PATH,
+            FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES
+        );
+        $updated = false;
+
+        foreach ($envContents as &$line) {
+            // Match existing key and update it
+            if (str_starts_with($line, "{$key}=")) {
+                $line = "{$key}={$value}";
+                $updated = true;
+                break;
+            }
+        }
+
+        // If the key was not found, add it to the end of the file
+        if (!$updated) {
+            $envContents[] = "{$key}={$value}";
+        }
+
+        // Write the updated contents back to the .env file
+        $newContents = implode(PHP_EOL, $envContents) . PHP_EOL;
+
+        return file_put_contents(ENV_PATH, $newContents) !== false;
+    }
 }
