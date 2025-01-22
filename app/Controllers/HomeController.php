@@ -5,6 +5,7 @@ namespace App\Controllers;
 use Base\Core\ContainerAwareTrait;
 use Base\Interfaces\ConfigHelperInterface;
 use Base\Interfaces\JWTInterface;
+use Base\Interfaces\NotificationManagerInterface;
 use Base\Interfaces\OTPManagerInterface;
 use Base\Interfaces\StorageManagerInterface;
 use Base\Interfaces\ViewInterface;
@@ -91,6 +92,8 @@ class HomeController
         }
         echo "<br />";
         echo "<br />";
+        echo "send email";
+        $this->sendEmail();
 
         /**
          * @var StorageManagerInterface $storage
@@ -159,5 +162,25 @@ class HomeController
 
         // Render the view template with the prepared data
         return $view->render("home.index", $data);
+    }
+
+    public function sendEmail()
+    {
+        /**
+         * @var NotificationManagerInterface $notifications
+         */
+        $notifications = $this->resolve(NotificationManagerInterface::class);
+
+        $data = [
+            "to" => "jeremias2@gmail.com",
+            "subject" => "Welcome to Forge",
+            "message" =>
+                "<h1>Thank you for signing up!</h1><p>Welcome to Forge</p>",
+            "isHtml" => true,
+        ];
+
+        $success = $notifications->send("email", $data);
+
+        return $success ? "Email sent!" : "Failed to send email.";
     }
 }

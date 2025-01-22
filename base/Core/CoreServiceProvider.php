@@ -18,12 +18,17 @@ use Base\Interfaces\JWTInterface;
 use Base\Interfaces\JWTMiddlewareInterface;
 use Base\Interfaces\KeyGeneratorInterface;
 use Base\Interfaces\LoggerInterface;
+use Base\Interfaces\NotificationManagerInterface;
 use Base\Interfaces\ORMDatabaseAdapterInterface;
 use Base\Interfaces\OTPDeliveryAdapterInterface;
 use Base\Interfaces\OTPManagerInterface;
 use Base\Interfaces\RouterInterface;
 use Base\Interfaces\SchemaBuilderInterface;
 use Base\Interfaces\StorageManagerInterface;
+use Base\Notifications\Drivers\EmailDriver;
+use Base\Notifications\Drivers\PushDriver;
+use Base\Notifications\Drivers\SMSDriver;
+use Base\Notifications\NotificationManager;
 use Base\ORM\DatabaseAdapter;
 use Base\Storage\Drivers\DatabaseStorageDriver;
 use Base\Storage\Drivers\FileStorageDriver;
@@ -209,6 +214,32 @@ class CoreServiceProvider extends ServiceProvider
                 default:
                     return new FileStorageDriver($configSession["path"]);
             }
+        });
+
+        // Notification
+        $container->bind(NotificationManagerInterface::class, function () {
+            /**
+            @var ConfigHelperInterface $configHelper
+            */
+            $configHelper = $this->resolve(ConfigHelperInterface::class);
+            $config = $configHelper::get("notifications.channels");
+
+            return new NotificationManager([
+                "email" => new EmailDriver(
+                    host: $config["email"]["host"],
+                    from: $config["email"]["from"],
+                    port: $config["email"]["port"],
+                    username: $config["email"]["username"],
+                    password: $config["email"]["password"],
+                    encryption: $config["email"]["encryption"]
+                ),
+                "sms" => new SMSDriver(
+                    $config["sms"]["accountSid"],
+                    $config["sms"]["authToken"],
+                    $config["sms"]["from"]
+                ),
+                "push" => new PushDriver($config["push"]["firebaseKey"]),
+            ]);
         });
     }
 }
