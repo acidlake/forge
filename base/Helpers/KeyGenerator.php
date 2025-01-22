@@ -18,13 +18,15 @@ class KeyGenerator implements KeyGeneratorInterface
      * @throws \RuntimeException If the strategy is not supported or invalid.
      */
     public function generate(
-        string $strategy = "uuid",
+        string $strategy = "id",
         int $keyLength = 36,
         array $keyFields = []
     ): string {
         switch ($strategy) {
             case "uuid":
-                return uuid_create();
+                return self::generateUuid();
+            case "id":
+                return self::generateId();
             case "nanoid":
                 return bin2hex(random_bytes($keyLength / 2));
             case "snowflake":
@@ -46,6 +48,39 @@ class KeyGenerator implements KeyGeneratorInterface
                     "Unsupported key strategy: {$strategy}"
                 );
         }
+    }
+
+    /**
+     * Generate a UUID (RFC 4122 version 4).
+     *
+     * @return string The generated UUID.
+     */
+    private function generateUuid(): string
+    {
+        if (function_exists("com_create_guid")) {
+            return strtolower(trim(com_create_guid(), "{}")); // Uses COM function in Windows
+        }
+
+        // Fallback UUID generation (no external dependencies)
+        $data = random_bytes(16);
+
+        // Set version 4 UUID (random)
+        $data[6] = chr((ord($data[6]) & 0x0f) | 0x40); // version 4
+        $data[8] = chr((ord($data[8]) & 0x3f) | 0x80); // variant 1
+
+        return vsprintf("%s%s-%s-%s-%s-%s%s%s", str_split(bin2hex($data), 4));
+    }
+
+    /**
+     * Generate a simple ID (sequential or random).
+     *
+     * @return string The generated ID (string format).
+     */
+    private function generateId(): string
+    {
+        // This is a simple incremented ID for demonstration purposes
+        // Ideally, the ID should be generated based on the database or some logic
+        return (string) mt_rand(100000, 999999); // Example: generates a random 6-digit number
     }
 
     /**

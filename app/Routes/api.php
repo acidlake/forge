@@ -1,7 +1,7 @@
 <?php
 
+use App\Controllers\Api\UserController;
 use Base\Interfaces\RouterInterface;
-use Base\Tools\MiddlewareHelper;
 
 /**
  * API Routes for the application.
@@ -43,32 +43,14 @@ return function (RouterInterface $router) {
         ],
     ];
 
-    /**
-     * Middleware applied to API routes.
-     *
-     * These middlewares handle tasks like JSON responses, CORS, security headers, rate limiting, etc.
-     *
-     * @var array $apiMiddlewares
-     */
-    $apiMiddlewares = [
-        MiddlewareHelper::jsonResponse(), // Ensure responses are in JSON format.
-        MiddlewareHelper::cors(), // Handle Cross-Origin Resource Sharing (CORS).
-        MiddlewareHelper::securityHeaders(), // Apply security-related HTTP headers.
-        MiddlewareHelper::compress(), // Enable response compression.
-        MiddlewareHelper::rateLimit(10, 60), // Limit to 10 requests per minute.
-        MiddlewareHelper::circuitBreaker(5, 60), // Trigger circuit breaker after 5 failures in 60 seconds.
-        MiddlewareHelper::ipWhitelist(["127.0.0.1", "192.168.1.1"]), // Restrict access to specific IPs.
-    ];
-
-    // Group API routes with middleware
-    $router->group($apiMiddlewares, function (RouterInterface $router) {
+    $router->api("/api/v1", function (RouterInterface $router) {
         /**
          * GET /api/status
          *
          * Example endpoint to check the API status.
          * Responds with a JSON object indicating that the API is working.
          */
-        $router->get("/api/status", function () {
+        $router->get("/status", function () {
             echo json_encode(["status" => "API is working!"]);
         });
 
@@ -78,8 +60,12 @@ return function (RouterInterface $router) {
          * Example endpoint to simulate data creation.
          * Responds with a JSON object confirming the data was created.
          */
-        $router->post("/api/data", function () {
+        $router->post("/data", function () {
             echo json_encode(["message" => "Data created successfully"]);
         });
+
+        $router->get("/users", [UserController::class, "index"]);
+
+        $router->post("/users", [UserController::class, "store"]);
     });
 };

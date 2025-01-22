@@ -9,19 +9,27 @@ use Base\Authentication\JWT\JWT;
 use Base\Authentication\OTP\Adapters\EmailAdapter;
 use Base\Authentication\OTP\Adapters\GoogleAuthenticatorAdapter;
 use Base\Authentication\OTP\OTPManager;
+use Base\Controllers\BaseApiController;
 use Base\Database\BaseSchemaBuilder;
 use Base\Helpers\EnvHelper;
+use Base\Helpers\EnvValueParser;
 use Base\Helpers\KeyGenerator;
+use Base\Helpers\ModelSerializerHelper;
+use Base\Interfaces\BaseApiControllerInterface;
 use Base\Interfaces\ConfigHelperInterface;
 use Base\Interfaces\ConfigurationManagerInterface;
+use Base\Interfaces\EnvValueParserInterface;
 use Base\Interfaces\JWTInterface;
 use Base\Interfaces\JWTMiddlewareInterface;
 use Base\Interfaces\KeyGeneratorInterface;
 use Base\Interfaces\LoggerInterface;
+use Base\Interfaces\ModelSerializerHelperInterface;
 use Base\Interfaces\NotificationManagerInterface;
 use Base\Interfaces\ORMDatabaseAdapterInterface;
 use Base\Interfaces\OTPDeliveryAdapterInterface;
 use Base\Interfaces\OTPManagerInterface;
+use Base\Interfaces\RequestInterface;
+use Base\Interfaces\ResponseInterface;
 use Base\Interfaces\RouterInterface;
 use Base\Interfaces\SchemaBuilderInterface;
 use Base\Interfaces\StorageManagerInterface;
@@ -30,6 +38,8 @@ use Base\Notifications\Drivers\PushDriver;
 use Base\Notifications\Drivers\SMSDriver;
 use Base\Notifications\NotificationManager;
 use Base\ORM\DatabaseAdapter;
+use Base\Router\Http\Request;
+use Base\Router\Http\Response;
 use Base\Storage\Drivers\DatabaseStorageDriver;
 use Base\Storage\Drivers\FileStorageDriver;
 use Base\Storage\Drivers\RedisStorageDriver;
@@ -243,5 +253,42 @@ class CoreServiceProvider extends ServiceProvider
         });
 
         // Queue Jobs
+        //
+
+        // TODO: Refactor to a Framework helper class
+        // to avoid adding every helper apart
+        $container->bind(EnvValueParserInterface::class, function () {
+            return new EnvValueParser();
+        });
+
+        // Base API Controller
+        $container->bind(BaseApiControllerInterface::class, function () {
+            return new BaseApiController();
+        });
+
+        // Model Serializer
+        $container->bind(ModelSerializerHelperInterface::class, function () {
+            return new ModelSerializerHelper();
+        });
+
+        // Request
+        $container->bind(
+            RequestInterface::class,
+            AdapterResolver::resolve(
+                RequestInterface::class,
+                Request::class,
+                "App\\Adapters\\Response"
+            )
+        );
+
+        // Response
+        $container->bind(
+            ResponseInterface::class,
+            AdapterResolver::resolve(
+                ResponseInterface::class,
+                Response::class,
+                "App\\Adapters\\Response"
+            )
+        );
     }
 }

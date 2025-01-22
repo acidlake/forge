@@ -9,9 +9,7 @@ use Base\ORM\BaseModel;
  * Represents the users table in the database.
  *
  * @property string $id
- * @property string $uuid
  * @property string $name
- * @property string $email
  */
 class User extends BaseModel
 {
@@ -19,12 +17,8 @@ class User extends BaseModel
     protected string $key = "id"; // Primary key for the table (UUID in this case)
 
     protected string $storage = "document";
-    protected string $keyStrategy = "uuid";
+    protected string $keyStrategy = "id";
 
-    protected array $fillable = ["id", "name"];
-
-    protected array $schema = [
-        "id" => ["type" => "uuid", "default" => "generate_uuid"],
-        "name" => ["type" => "string", "required" => true],
-    ];
+    protected array $fillable = ["name"];
+    protected array $keyFields = ["id"];
 }
