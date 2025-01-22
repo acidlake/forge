@@ -5,8 +5,9 @@ namespace Base\Queue;
 use Base\Interfaces\ConfigHelperInterface;
 use Base\Interfaces\QueueAdapterInterface;
 use Base\Core\ContainerAwareTrait;
+use Base\Interfaces\QueueManagerInterface;
 
-class QueueManager
+class QueueManager implements QueueManagerInterface
 {
     use ContainerAwareTrait;
 
@@ -15,7 +16,7 @@ class QueueManager
     public function __construct()
     {
         $config = $this->resolve(ConfigHelperInterface::class);
-        $adapterClass = $config->get("queue.default_adapter");
+        $adapterClass = $config->get("queue.default");
         $this->adapter = $this->resolve($adapterClass);
     }
 
