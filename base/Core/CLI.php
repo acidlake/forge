@@ -2,7 +2,10 @@
 
 namespace Base\Core;
 
+use Base\Commands\ClearCommand;
 use Base\Commands\ListCommand;
+use Base\Commands\ResetCommand;
+use Base\Commands\SeedCommand;
 use Base\Interfaces\CommandInterface;
 use Base\Commands\HelpCommand;
 
@@ -35,6 +38,9 @@ class CLI
 
         $this->commands["help"] = new HelpCommand($this);
         $this->commands["list"] = new ListCommand($this);
+        $this->commands["seed"] = new SeedCommand($this);
+        $this->commands["reset"] = new ResetCommand();
+        $this->commands["clear"] = new ClearCommand();
     }
 
     /**

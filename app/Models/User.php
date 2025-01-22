@@ -22,4 +22,9 @@ class User extends BaseModel
     protected string $keyStrategy = "uuid";
 
     protected array $fillable = ["id", "name"];
+
+    protected array $schema = [
+        "id" => ["type" => "uuid", "default" => "generate_uuid"],
+        "name" => ["type" => "string", "required" => true],
+    ];
 }

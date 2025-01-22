@@ -105,4 +105,13 @@ class DatabaseAdapter implements ORMDatabaseAdapterInterface
 
         return $statement->execute(["value" => $value]);
     }
+
+    public function getTables(): array
+    {
+        $query = $this->query(
+            "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'"
+        );
+
+        return array_map(fn($row) => $row["table_name"], $query->fetchAll());
+    }
 }

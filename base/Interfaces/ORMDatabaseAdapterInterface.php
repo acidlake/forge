@@ -16,4 +16,5 @@ interface ORMDatabaseAdapterInterface
      * @return mixed The result of the query execution.
      */
     public function query(string $sql, array $params = []): mixed;
+    public function getTables(): array;
 }

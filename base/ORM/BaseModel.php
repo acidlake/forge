@@ -2,6 +2,7 @@
 namespace Base\ORM;
 
 use Base\Core\ContainerAwareTrait;
+use Base\Core\ContainerHelper;
 use Base\Interfaces\KeyGeneratorInterface;
 use Base\Interfaces\ORMDatabaseAdapterInterface;
 use Base\Traits\SoftDeletes;
@@ -14,6 +15,7 @@ abstract class BaseModel
     protected string $table = ""; // Database table
     protected string $key = "id"; // Primary key column
     protected array $fillable = []; // Columns allowed for mass assignment
+    protected array $schema = [];
     protected string $keyStrategy = "id"; // Default strategy
     protected int $keyLength = 36;
 
@@ -29,6 +31,14 @@ abstract class BaseModel
         foreach ($this->fillable as $property) {
             $this->attributes[$property] = null;
         }
+    }
+
+    /**
+     * Factory method to create a new model instance with defaults.
+     */
+    public static function new(array $attributes = []): self
+    {
+        return new static($attributes);
     }
 
     public function __get(string $name): mixed
@@ -109,6 +119,56 @@ abstract class BaseModel
         return $this->adapter->save($this->table, $this->toArray(), $this->key);
     }
 
+    /**
+     * Insert multiple records into the database.
+     */
+    public static function insert(array $records): void
+    {
+        $db = (new static())->getDatabaseAdapter();
+        $db->save((new static())->getTableName(), $records);
+    }
+
+    /**
+     * Get the table name for the model.
+     */
+    public function getTableName(): string
+    {
+        return $this->tableName;
+    }
+
+    /**
+     * Fill attributes with defaults and validate against schema.
+     */
+    protected function validateAndFillDefaults(array $attributes): array
+    {
+        $filled = [];
+
+        foreach ($this->schema as $field => $rules) {
+            if (array_key_exists($field, $attributes)) {
+                $filled[$field] = $attributes[$field];
+            } elseif (isset($rules["default"])) {
+                $filled[$field] = $this->resolveDefault($rules["default"]);
+            } elseif (!empty($rules["required"])) {
+                throw new \InvalidArgumentException(
+                    "Field '{$field}' is required."
+                );
+            }
+        }
+
+        return $filled;
+    }
+
+    /**
+     * Resolve default values for a field.
+     */
+    protected function resolveDefault(mixed $default): mixed
+    {
+        if (is_callable($default)) {
+            return call_user_func($default);
+        }
+        return $default;
+    }
+
     public function delete(): bool
     {
         return $this->adapter->delete($this->table, $this->{$this->key});
@@ -120,6 +180,16 @@ abstract class BaseModel
             $this->keyStrategy,
             $this->keyLength,
             $this->keyFields ?? []
+        );
+    }
+
+    /**
+     * Get the database adapter from the container.
+     */
+    protected function getDatabaseAdapter(): ORMDatabaseAdapterInterface
+    {
+        return ContainerHelper::getContainer()->resolve(
+            ORMDatabaseAdapterInterface::class
         );
     }
 }

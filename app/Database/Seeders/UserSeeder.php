@@ -1,23 +1,15 @@
 <?php
-namespace App\Seeders;
+namespace App\Database\Seeders;
 
 use Base\Database\BaseSeeder;
+use App\Models\User;
 
 class UserSeeder extends BaseSeeder
 {
     public function run(): void
     {
-        $this->db->save("users", [
-            [
-                "name" => "John Doe",
-                "email" => "john@example.com",
-                "password" => "secret",
-            ],
-            [
-                "name" => "Jane Doe",
-                "email" => "jane@example.com",
-                "password" => "secret",
-            ],
+        User::new([
+            "name" => "Otro mas",
         ]);
 
         echo "UserSeeder executed.\n";

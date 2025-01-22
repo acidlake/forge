@@ -51,4 +51,19 @@ class BaseSchemaBuilder implements SchemaBuilderInterface
         $sql = $schema->toSql();
         $this->adapter->query($sql);
     }
+
+    /**
+     * Drop all tables in the database.
+     *
+     * @return void
+     */
+    public function dropAllTables(): void
+    {
+        $tables = $this->adapter->getTables();
+
+        foreach ($tables as $table) {
+            $this->adapter->query("DROP TABLE IF EXISTS {$table} CASCADE");
+            echo "Dropped table: {$table}\n";
+        }
+    }
 }

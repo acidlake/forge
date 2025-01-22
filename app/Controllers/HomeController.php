@@ -102,6 +102,10 @@ class HomeController
 
         print_r($config->get("environment.supported"));
 
+        echo "<pre>";
+        print_r($user);
+        echo "</pre>";
+
         // Render the view template with the prepared data
         return $view->render("home.index", $data);
     }

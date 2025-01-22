@@ -16,6 +16,7 @@ class SchemaBlueprint
     private array $columns = [];
     private array $constraints = [];
     private bool $nullable = false;
+    private bool $unique = false;
 
     public function __construct(string $table, bool $modify = false)
     {
@@ -32,6 +33,25 @@ class SchemaBlueprint
     public function uuid(string $name = "id"): self
     {
         $this->columns[] = "{$name} CHAR(36) NOT NULL UNIQUE";
+        return $this;
+    }
+
+    /**
+     * Add an auto-incrementing integer primary key.
+     */
+    public function primary(string $name = "id"): self
+    {
+        $this->columns[] = "{$name} INT AUTO_INCREMENT PRIMARY KEY";
+        return $this;
+    }
+
+    /**
+     * Add a unique property to the last column.
+     */
+    public function unique(): self
+    {
+        $this->unique = true;
+        $this->columns[count($this->columns) - 1] .= " UNIQUE";
         return $this;
     }
 

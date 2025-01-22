@@ -1,6 +1,7 @@
 <?php
 namespace Base\Commands;
 
+use Base\Database\BaseSeeder;
 use Base\Interfaces\CommandInterface;
 use Base\Interfaces\SeederInterface;
 
@@ -10,7 +11,7 @@ class SeedCommand implements CommandInterface
 
     public function __construct()
     {
-        $this->seederPath = BASE_PATH . "/app/Seeders";
+        $this->seederPath = BASE_PATH . "/app/Database/Seeders";
     }
 
     public function getName(): string
@@ -25,25 +26,20 @@ class SeedCommand implements CommandInterface
 
     public function execute(array $arguments = []): void
     {
-        echo "Running seeders...\n";
+        $seederClass = $arguments[0] ?? "App\\Seeders\\DatabaseSeeder";
 
-        $seederFiles = glob("{$this->seederPath}/*.php");
-        foreach ($seederFiles as $file) {
-            $seederName = basename($file, ".php");
-
-            require_once $file;
-            $seederClass = "App\\Seeders\\{$seederName}";
-
-            if (
-                class_exists($seederClass) &&
-                is_subclass_of($seederClass, SeederInterface::class)
-            ) {
-                $seeder = new $seederClass();
-                $seeder->run();
-                echo "Seeded: {$seederName}\n";
-            }
+        if (!class_exists($seederClass)) {
+            echo "Seeder class {$seederClass} not found.\n";
+            return;
         }
 
-        echo "Seeding complete.\n";
+        $seeder = new $seederClass();
+        if ($seeder instanceof BaseSeeder) {
+            echo "Running seeder: {$seederClass}\n";
+            $seeder->run();
+            echo "Seeder completed.\n";
+        } else {
+            echo "Class {$seederClass} is not a valid seeder.\n";
+        }
     }
 }
