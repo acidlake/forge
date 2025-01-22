@@ -65,6 +65,16 @@ class EnvLoader
             // Fix mismatched quotes
             $value = trim($value, '"\'');
 
+            // Check if the value is a comma-separated list (array-like)
+            if (strpos($value, ",") !== false) {
+                // Convert to array by splitting and trimming
+                $value = array_map("trim", explode(",", $value));
+            }
+
+            if (is_array($value)) {
+                $value = implode(",", $value);
+            }
+
             // Set in environment
             putenv("{$key}={$value}");
             $_ENV[$key] = $value;

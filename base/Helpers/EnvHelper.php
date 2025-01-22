@@ -94,6 +94,12 @@ class EnvHelper
                 "Env variable {$key} is not set. Defaulting to: {$default}"
             );
         }
+
+        // Check for comma-separated list (array)
+        if ($value && strpos($value, ",") !== false) {
+            return array_map("trim", explode(",", $value));
+        }
+
         return $value ?: $default;
     }
 

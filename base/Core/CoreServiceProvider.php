@@ -11,9 +11,11 @@ use Base\Authentication\OTP\Adapters\GoogleAuthenticatorAdapter;
 use Base\Authentication\OTP\OTPManager;
 use Base\Database\BaseSchemaBuilder;
 use Base\Helpers\EnvHelper;
+use Base\Helpers\EnvValueParser;
 use Base\Helpers\KeyGenerator;
 use Base\Interfaces\ConfigHelperInterface;
 use Base\Interfaces\ConfigurationManagerInterface;
+use Base\Interfaces\EnvValueParserInterface;
 use Base\Interfaces\JWTInterface;
 use Base\Interfaces\JWTMiddlewareInterface;
 use Base\Interfaces\KeyGeneratorInterface;
@@ -243,5 +245,12 @@ class CoreServiceProvider extends ServiceProvider
         });
 
         // Queue Jobs
+        //
+
+        // TODO: Refactor to a Framework helper class
+        // to avoid adding every helper apart
+        $container->bind(EnvValueParserInterface::class, function () {
+            return new EnvValueParser();
+        });
     }
 }

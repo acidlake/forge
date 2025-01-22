@@ -2,7 +2,11 @@
 
 namespace Base\Adapters;
 
+use Base\Core\ContainerAwareTrait;
+use Base\Interfaces\ConfigHelperInterface;
+use Base\Interfaces\EnvValueParserInterface;
 use Base\Interfaces\RouterInterface;
+use Base\Tools\MiddlewareHelper;
 
 /**
  * CustomRouter provides a lightweight routing system for the Forge framework.
@@ -18,6 +22,7 @@ use Base\Interfaces\RouterInterface;
  */
 class CustomRouter implements RouterInterface
 {
+    use ContainerAwareTrait;
     /**
      * List of registered routes.
      *
@@ -195,7 +200,22 @@ class CustomRouter implements RouterInterface
      */
     private function convertToRegex(string $route): string
     {
+        // Check if the route already starts with regex delimiters
+        if (str_starts_with($route, "#^") && str_ends_with($route, "$#")) {
+            return $route; // Return the pattern as is
+        }
+
+        // Replace placeholders like {id} with named capture groups
         $route = preg_replace("/\{([a-zA-Z0-9_]+)\}/", '(?P<$1>[^/]+)', $route);
+
+        // Escape special regex characters in the route
+        $route = preg_quote($route, "#");
+
+        // Reapply the named capture groups after escaping
+        $route = str_replace("\(\?P<", "(?P<", $route);
+        $route = str_replace("\>[^\/]+\)", ">[^/]+)", $route);
+
+        // Add start (^) and end ($) delimiters
         return "#^" . $route . "$#";
     }
 
@@ -207,10 +227,81 @@ class CustomRouter implements RouterInterface
      */
     public function group(array $middleware, callable $callback): void
     {
-        array_push($this->middlewareStack, ...$middleware);
-        $callback($this);
-        foreach ($middleware as $mw) {
-            array_pop($this->middlewareStack);
+        $originalStack = $this->middlewareStack;
+        $this->middlewareStack = array_merge(
+            $this->middlewareStack,
+            $middleware
+        );
+
+        try {
+            $callback($this);
+        } finally {
+            $this->middlewareStack = $originalStack;
         }
+    }
+
+    public function api(string $prefix, callable $callback): void
+    {
+        /**
+         * Resolve configuration and environment parsers.
+         * @var ConfigHelperInterface $configHelper
+         * @var EnvValueParserInterface $parser
+         */
+        $configHelper = $this->resolve(ConfigHelperInterface::class);
+        $parser = $this->resolve(EnvValueParserInterface::class);
+
+        $ipwhitelist = $parser->parseCommaSeparatedString(
+            $configHelper->get("security.ipwhitelist")
+        );
+        $rateLimitMaxRequests = $configHelper->get(
+            "security.rate_limit_max_request"
+        );
+        $rateLimitTimeFrame = $configHelper->get(
+            "security.rate_limit_time_frame"
+        );
+        $circuitBreakerFailureThreshold = $configHelper->get(
+            "security.circuit_breaker_failure_threshold"
+        );
+        $circuitBreakerTimeFrame = $configHelper->get(
+            "security.circuit_breaker_time_frame"
+        );
+
+        /**
+         * Middleware applied to API routes.
+         *
+         * These middlewares handle tasks like JSON responses, CORS, security headers, rate limiting, etc.
+         *
+         * @var array $apiMiddlewares
+         */
+        $apiMiddlewares = [
+            MiddlewareHelper::jsonResponse(), // Ensure responses are in JSON format.
+            MiddlewareHelper::cors(), // Handle Cross-Origin Resource Sharing (CORS).
+            MiddlewareHelper::securityHeaders(), // Apply security-related HTTP headers.
+            MiddlewareHelper::compress(), // Enable response compression.
+            MiddlewareHelper::rateLimit(
+                $rateLimitMaxRequests,
+                $rateLimitTimeFrame
+            ), // Limit to 10 requests per minute.
+            MiddlewareHelper::circuitBreaker(
+                $circuitBreakerFailureThreshold,
+                $circuitBreakerTimeFrame
+            ), // Trigger circuit breaker after 5 failures in 60 seconds.
+            MiddlewareHelper::ipWhitelist($ipwhitelist), // Restrict access to specific IPs.
+        ];
+
+        $this->group($apiMiddlewares, function () use ($prefix, $callback) {
+            $originalRoutes = $this->routes;
+            $this->routes = [];
+
+            $callback($this);
+            foreach ($this->routes as &$route) {
+                // Prepend the prefix to the route's pattern
+                $route["pattern"] = $this->convertToRegex(
+                    $prefix . substr($route["pattern"], 2, -2)
+                ); // Adjust regex
+            }
+
+            $this->routes = array_merge($originalRoutes, $this->routes);
+        });
     }
 }

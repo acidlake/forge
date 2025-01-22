@@ -34,7 +34,7 @@ return [
         "lifetime" => 604800, // 7 days
     ],
     "otp" => [
-        "length" => 6,
-        "delivery" => "email", // 'google_auth', 'sms', etc.
+        "length" => EnvHelper::get("OTP_CODE_LENGTH", 6),
+        "delivery" => EnvHelper::get("OTP_DELIVERY_METHOD", "email"), // 'google_auth', 'sms', etc.
     ],
 ];
