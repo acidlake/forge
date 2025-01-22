@@ -8,6 +8,13 @@
 - Feat: Added Environment loader
 - Feat: Added option to load .env files
 - Feat: Added option to handle multiple environments
+- Feat: Added Database Support
+- Feat: Added Database Adapters
+- Feat: Added Database Migrations
+- Feat: Added Database Seeders
+- Feat: Added Database Schema Builder
+- Feat: Added Database Schema Blueprint
+- Feat: Added ORM
 
 ### v0.1.0
 - Feat: Initial Version
