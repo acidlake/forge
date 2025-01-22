@@ -19,8 +19,6 @@ use Base\Interfaces\OTPManagerInterface;
  */
 class CLI
 {
-    use ContainerAwareTrait;
-
     /**
      * List of registered commands.
      *
@@ -34,16 +32,11 @@ class CLI
      */
     public function __construct()
     {
-        /**
-         * @var OTPManagerInterface $otpManager
-         */
-        $otpManager = $this->resolve(OTPManagerInterface::class);
         $this->loadCoreCommands();
         $this->loadUserCommands();
 
         $this->commands["help"] = new HelpCommand($this);
         $this->commands["list"] = new ListCommand($this);
-        $this->commands["otp:generate"] = new GenerateOTPCommand($otpManager);
     }
 
     /**

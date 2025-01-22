@@ -51,6 +51,10 @@ return [
             "database" => EnvHelper::get("DB_DATABASE", "forge"), // Name of the database
             "username" => EnvHelper::get("DB_USERNAME", "root"), // Database username
             "password" => EnvHelper::get("DB_PASSWORD", ""), // Database password
+            "dsn" => EnvHelper::get(
+                "DB_DSN",
+                "mysql:host=localhost;dbname=forge;port=3306"
+            ),
         ],
     ],
 ];

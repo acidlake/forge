@@ -23,7 +23,11 @@ use Base\Interfaces\OTPDeliveryAdapterInterface;
 use Base\Interfaces\OTPManagerInterface;
 use Base\Interfaces\RouterInterface;
 use Base\Interfaces\SchemaBuilderInterface;
+use Base\Interfaces\StorageManagerInterface;
 use Base\ORM\DatabaseAdapter;
+use Base\Storage\Drivers\DatabaseStorageDriver;
+use Base\Storage\Drivers\FileStorageDriver;
+use Base\Storage\Drivers\RedisStorageDriver;
 use Base\Templates\DefaultViewEngine;
 use Base\Tools\ConfigHelper;
 use Base\Tools\JWTMiddleware;
@@ -172,6 +176,40 @@ class CoreServiceProvider extends ServiceProvider
         // SMS
         $container->bind(OTPDeliveryAdapterInterface::class, function () {
             return new SmsTwillioAdapter();
+        });
+
+        // Storage
+        $container->bind(StorageManagerInterface::class, function () {
+            /**
+            @var ConfigHelperInterface $configHelper
+            */
+            $configHelper = $this->resolve(ConfigHelperInterface::class);
+            $configSession = $configHelper::get("storage.session");
+            $driver = $configSession->driver;
+
+            print $driver;
+
+            switch ($driver) {
+                case "redis":
+                // TODO: Implement redis
+                // $redis = new Redis();
+                // $redis->connect(
+                //     env("REDIS_HOST", "127.0.0.1"),
+                //     env("REDIS_PORT", 6379)
+                // );
+                // return new RedisStorageDriver($redis);
+
+                case "database":
+                    $pdo = new \PDO(
+                        EnvHelper::get("DB_DSN"),
+                        EnvHelper::get("DB_USERNAME"),
+                        EnvHelper::get("DB_PASSWORD")
+                    );
+                    return new DatabaseStorageDriver($pdo);
+
+                default:
+                    return new FileStorageDriver($configSession->path);
+            }
         });
     }
 }
