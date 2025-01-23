@@ -2,9 +2,13 @@
 
 namespace Base\Templates;
 
+use Base\Templates\SyntaxHandlers\ArrayHandler;
+use Base\Templates\SyntaxHandlers\AssetHandler;
 use Base\Templates\SyntaxHandlers\ComponentHandler;
+use Base\Templates\SyntaxHandlers\HelperHandler;
 use Base\Templates\SyntaxHandlers\IfHandler;
 use Base\Templates\SyntaxHandlers\EachHandler;
+use Base\Templates\SyntaxHandlers\ObjectHandler;
 use Base\Templates\SyntaxHandlers\PartialHandler;
 use Base\Templates\SyntaxHandlers\VariableHandler;
 use Base\Templates\SyntaxHandlers\FunctionHandler;
@@ -13,6 +17,9 @@ use Base\Templates\SyntaxHandlers\DefaultValueHandler;
 use Base\Templates\SyntaxHandlers\EscapeHandler;
 use Base\Templates\SyntaxHandlers\SetVariableHandler;
 use Base\Templates\SyntaxHandlers\SwitchHandler;
+use Base\Templates\SyntaxHandlers\JsonHandler;
+use Base\Templates\SyntaxHandlers\DateHandler;
+use Base\Templates\SyntaxHandlers\DebugHandler;
 
 /**
  * TemplatePreprocessor processes templates by applying syntax handlers.
@@ -47,13 +54,20 @@ class TemplatePreprocessor
             new EachHandler(),
             new VariableHandler(),
             new PartialHandler(),
-            new FunctionHandler(),
             new AttributeHandler(),
             new DefaultValueHandler(),
             new EscapeHandler(),
             new SetVariableHandler(),
             new SwitchHandler(),
             new ComponentHandler(),
+            new HelperHandler(),
+            new ArrayHandler(),
+            new ObjectHandler(),
+            new AssetHandler(),
+            new JsonHandler(),
+            new DebugHandler(),
+            new DateHandler(),
+            new FunctionHandler(),
         ];
     }
 
@@ -73,6 +87,20 @@ class TemplatePreprocessor
             $content = $handler->process($content, $data);
         }
 
+        $content = $this->cleanPlaceholders($content);
+
         return $content;
+    }
+
+    /**
+     * Clean up placeholders left in the template content.
+     *
+     * @param string $content The template content to clean up.
+     *
+     * @return string The cleaned template content.
+     */
+    private function cleanPlaceholders(string $content): string
+    {
+        return str_replace("___PSEUDO_INLINE_PLACEHOLDER___", "", $content);
     }
 }

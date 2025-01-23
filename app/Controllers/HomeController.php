@@ -56,8 +56,8 @@ class HomeController
          *
          * @var User $user
          */
-        $user = User::find(1);
-        print_r($user->name);
+        $userData = User::find(1);
+
         /**
          * @var JWTInterface $jwt
          */
@@ -135,6 +135,11 @@ class HomeController
             "class" => "btn btn-primary",
         ];
 
+        $users = [
+            "name" => "test",
+            "none" => "hi",
+        ];
+
         /**
          * Data passed to the `home.index` view template.
          *
@@ -147,7 +152,9 @@ class HomeController
             "isLoggedIn" => true,
             "posts" => $posts,
             "attributes" => $attributes,
-            "user" => $user,
+            "user" => $userData,
+            "users" => $users,
+            "counter" => 10,
         ];
 
         if (EnvHelper::is("development")) {

@@ -1,28 +1,63 @@
 .pagination {
     display: flex;
+    justify-content: center; /* Center the pagination */
+    align-items: center;
+    gap: 8px; /* Space between items */
     list-style: none;
     padding: 0;
+    margin: 20px 0; /* Add spacing around the pagination */
 }
 
 .pagination li {
-    margin: 0 5px;
+    margin: 0; /* Reset margin */
 }
 
 .pagination .page-link {
+    display: inline-flex; /* Ensure consistent alignment */
+    justify-content: center;
+    align-items: center;
+    width: 36px; /* Fixed width for uniform buttons */
+    height: 36px; /* Fixed height for circular shape */
     text-decoration: none;
-    color: #007bff;
-    padding: 5px 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
+    color: #333; /* Neutral text color */
+    font-size: 0.9rem; /* Slightly smaller text */
+    background-color: #fff; /* White background */
+    border: 1px solid #ddd; /* Light border */
+    border-radius: 8px; /* Subtle rounding for modern look */
+    transition: all 0.3s ease; /* Smooth hover effect */
+    cursor: pointer;
 }
 
-.pagination .active a {
-    background-color: #007bff;
-    color: #fff;
-    border-color: #007bff;
+.pagination .page-link:hover {
+    background-color: #f7f9fc; /* Soft hover background */
+    border-color: #ccc;
+}
+
+.pagination .active .page-link {
+    background-color: #4a90e2; /* Blue active background */
+    color: #fff; /* White text */
+    font-weight: bold; /* Bold active page */
+    border-color: #4a90e2; /* Match border with background */
+    cursor: default; /* Disable pointer on active */
 }
 
 .pagination .ellipsis {
-    padding: 5px 10px;
-    color: #aaa;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 36px;
+    height: 36px;
+    color: #aaa; /* Muted ellipsis */
+    pointer-events: none; /* Make ellipsis non-clickable */
+}
+
+.pagination .page-link svg {
+    width: 16px;
+    height: 16px;
+    color: #aaa; /* Icon color */
+    transition: color 0.3s ease;
+}
+
+.pagination .page-link:hover svg {
+    color: #333; /* Darker color on hover */
 }

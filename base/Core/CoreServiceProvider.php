@@ -8,6 +8,7 @@ use Base\Providers\CommandServiceProvider;
 use Base\Providers\ConfigurationServiceProvider;
 use Base\Providers\DatabaseServiceProvider;
 use Base\Providers\EnvironmentServiceProvider;
+use Base\Providers\LogServiceProvider;
 use Base\Providers\LoggerServiceProvider;
 use Base\Providers\ModelServiceProvider;
 use Base\Providers\NotificationServiceProvider;
@@ -49,6 +50,7 @@ class CoreServiceProvider extends ServiceProvider
         (new EnvironmentServiceProvider())->register($container);
         (new CommandServiceProvider())->register($container);
         (new CommandLoaderServiceProvider())->register($container);
+        (new LogServiceProvider())->register($container);
         (new LoggerServiceProvider())->register($container);
         (new AuthenticationServiceProvider())->register($container);
         (new DatabaseServiceProvider())->register($container);

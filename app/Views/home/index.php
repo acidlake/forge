@@ -6,6 +6,7 @@
     <title>{{ $title }}</title>
 </head>
 <body>
+    {dump($user)}
     {#include "partials.header"}
 
     <h1>Welcome to {{ $frameworkName }}</h1>
@@ -17,8 +18,9 @@
             {print_r($posts)}
         </pre>
         {#if $isLoggedIn}
-        <!-- TODO: Add support for object type handlers -->
-        <p>Welcome back, {{ $user->name }}</p>
+        <!-- TODO: Add support for object type handlers and to get array property like the on bellow next to Welcome back -->
+        <p>Welcome back,  {{$user->name}}</p>
+        {{ $users["name"] }}
         {:else}
         <p>Please login</p>
         {/if}
@@ -35,9 +37,31 @@
 
         <a $attributes>Visit Example</a>
 
-        <!-- TODO: Add support for Helpershandlers to be used as template syntax {#if EnvHelper::isEnvironment->development}
-            <p>Development mode: Debugging enabled.</p>
-        {/if} -->
+        {#while ($counter > 0)}
+        <p>{{ $counter }}</p>
+            {#set $counter = $counter - 1}
+        {/while}
 
+
+        <h2>Numbers</h2>
+        {#range 1 to 5 as $number}
+            <p>Number: {{ $number }}</p>
+        {/range}
+
+        {Base\Helpers\StringHelper::capitalizeWords("jeremias nunez pozo")}
+
+
+
+
+
+        <p>Current date: {date('Y-m-d', 'now')}</p>
+
+        {debug($totalPosts)}
+        {dump($user)}
+
+
+        <script>
+            var userData = {json($user)};
+        </script>
 </body>
 </html>

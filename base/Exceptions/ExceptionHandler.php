@@ -4,12 +4,25 @@ namespace Base\Exceptions;
 use Base\Core\ContainerHelper;
 use Base\Router\Http\Response;
 use Base\Interfaces\ViewInterface;
+use Base\Services\Log\LogManager;
 use Throwable;
 
 class ExceptionHandler
 {
     public static function handle(Throwable $exception): void
     {
+        // TODO: FIx log manager
+        // $logManager = ContainerHelper::getContainer()->resolve(
+        //     LogManager::class
+        // );
+
+        // // Log the exception
+        // $logManager->logError($exception->getMessage(), [
+        //     "file" => $exception->getFile(),
+        //     "line" => $exception->getLine(),
+        //     "trace" => $exception->getTraceAsString(),
+        // ]);
+
         $isApi = str_starts_with($_SERVER["REQUEST_URI"] ?? "", "/api");
 
         self::logException($exception);

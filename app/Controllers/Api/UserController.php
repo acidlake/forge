@@ -23,7 +23,7 @@ class UserController extends BaseApiController
         $view = $this->resolve(ViewInterface::class);
 
         $page = $request->query("page", 1);
-        $perPage = $request->query("per_page");
+        $perPage = $request->query("per_page", 10);
         $users = User::paginate($perPage, $page);
 
         $paginationHelper = (new HtmlPaginationHelper())
