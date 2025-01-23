@@ -52,4 +52,19 @@ class PathHelper
     {
         return str_starts_with($path, DIRECTORY_SEPARATOR);
     }
+
+    public static function resolve(string $path, string $basePath): string
+    {
+        // Convert to absolute if not already
+        if (!self::isAbsolute($path)) {
+            $path =
+                rtrim($basePath, DIRECTORY_SEPARATOR) .
+                DIRECTORY_SEPARATOR .
+                ltrim($path, DIRECTORY_SEPARATOR);
+        }
+
+        // Normalize the path and ensure trailing slash
+        return rtrim(self::normalize($path), DIRECTORY_SEPARATOR) .
+            DIRECTORY_SEPARATOR;
+    }
 }

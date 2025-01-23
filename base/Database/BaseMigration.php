@@ -1,15 +1,15 @@
 <?php
 namespace Base\Database;
 
-use Base\Interfaces\ORMDatabaseAdapterInterface;
+use Base\Database\DatabaseAdapterInterface;
 
 abstract class BaseMigration
 {
-    protected ORMDatabaseAdapterInterface $adapter;
+    protected DatabaseAdapterInterface $adapter;
     protected BaseSchemaBuilder $schema;
 
     public function __construct(
-        ORMDatabaseAdapterInterface $adapter,
+        DatabaseAdapterInterface $adapter,
         BaseSchemaBuilder $schema
     ) {
         $this->adapter = $adapter;

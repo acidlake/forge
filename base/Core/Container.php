@@ -61,8 +61,7 @@ class Container
         if (!isset($this->bindings[$abstract])) {
             throw new Exception("No binding found for {$abstract}");
         }
-
-        return call_user_func($this->bindings[$abstract]);
+        return call_user_func($this->bindings[$abstract], $this);
     }
 
     /**
@@ -75,5 +74,10 @@ class Container
     public function has(string $abstract): bool
     {
         return isset($this->bindings[$abstract]);
+    }
+
+    public function getAllBindings(): array
+    {
+        return $this->bindings;
     }
 }

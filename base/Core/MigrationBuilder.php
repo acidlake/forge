@@ -10,9 +10,9 @@ class MigrationBuilder
     /**
      * The database adapter used to execute SQL queries.
      *
-     * @var DatabaseAdapterInterface
+     * @var DatabaseAdapterInterface|null
      */
-    protected static DatabaseAdapterInterface $db;
+    protected static ?DatabaseAdapterInterface $db = null;
 
     /**
      * Initialize the migration builder with a database adapter.
@@ -22,6 +22,20 @@ class MigrationBuilder
     public static function init(DatabaseAdapterInterface $adapter): void
     {
         self::$db = $adapter;
+    }
+
+    /**
+     * Ensure the database adapter is initialized before using it.
+     *
+     * @throws \RuntimeException If the database adapter is not initialized.
+     */
+    protected static function ensureInitialized(): void
+    {
+        if (self::$db === null) {
+            throw new \RuntimeException(
+                "MigrationBuilder is not initialized. Call MigrationBuilder::init() with a valid DatabaseAdapterInterface."
+            );
+        }
     }
 
     /**
@@ -41,6 +55,8 @@ class MigrationBuilder
      */
     public static function create(string $tableName, callable $callback): void
     {
+        self::ensureInitialized();
+
         $blueprint = new Blueprint();
 
         // Let the user define the schema using the callback
@@ -65,6 +81,8 @@ class MigrationBuilder
      */
     public static function dropIfExists(string $tableName): void
     {
+        self::ensureInitialized();
+
         $sql = "DROP TABLE IF EXISTS `{$tableName}`";
         self::$db->execute($sql);
     }
@@ -84,6 +102,8 @@ class MigrationBuilder
      */
     public static function table(string $tableName, callable $callback): void
     {
+        self::ensureInitialized();
+
         $blueprint = new Blueprint();
 
         // Let the user define the new columns

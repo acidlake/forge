@@ -29,6 +29,18 @@ class DatabaseAdapter implements
     }
 
     /**
+     * Fetch one record.
+     */
+    public function fetchOne(string $query, array $bindings = []): ?array
+    {
+        $stmt = $this->pdo->prepare($query);
+        $stmt->execute($bindings);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $result ?: null;
+    }
+
+    /**
      * Fetch all records.
      */
     public function fetchAll(string $query, array $bindings = []): array

@@ -25,6 +25,7 @@ class HelpCommand implements CommandInterface
 
     public function execute(array $arguments = []): void
     {
+        echo "Executing HelpCommand...\n";
         echo "Available commands:\n";
         foreach ($this->cli->getCommands() as $name => $command) {
             echo "  {$name}: {$command->getDescription()}\n";

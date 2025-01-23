@@ -5,16 +5,18 @@ use Base\Helpers\EnvHelper;
 return [
     "session" => [
         "driver" => EnvHelper::get("SESSION_STORAGE_DRIVER", "file"),
-        "path" => EnvHelper::get(
+        "path" => EnvHelper::getPath(
             "SESSION_STORAGE_PATH",
-            BASE_PATH . "/storage/sessions"
+            "storage/sessions",
+            BASE_PATH
         ),
     ],
     "files" => [
         "driver" => EnvHelper::get("FILE_STORAGE_DRIVER", "local"),
-        "path" => EnvHelper::get(
+        "path" => EnvHelper::getPath(
             "FILE_STORAGE_PATH",
-            BASE_PATH . "/storage/files"
+            "storage/files",
+            BASE_PATH
         ),
     ],
 ];

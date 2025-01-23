@@ -4,60 +4,62 @@ namespace Base\Providers;
 use Base\Core\Container;
 use Base\Core\SeederManager;
 use Base\Database\BaseSchemaBuilder;
-use Base\Database\MigrationManager;
-use Base\Helpers\EnvHelper;
-use Base\Interfaces\ORMDatabaseAdapterInterface;
+use Base\Core\MigrationManager;
 use Base\Interfaces\ProviderInterface;
-use Base\Interfaces\SchemaBuilderInterface;
-use Base\ORM\DatabaseAdapter;
+use Base\Database\DatabaseAdapterInterface;
+use Base\ORM\DefaultOrmManager;
 use Base\ORM\OrmManagerInterface;
 
 class DatabaseServiceProvider implements ProviderInterface
 {
     public function register(Container $container): void
     {
-        $container->bind(ORMDatabaseAdapterInterface::class, function () {
+        // Bind DatabaseAdapterInterface
+        $container->bind(DatabaseAdapterInterface::class, function (
+            Container $container
+        ) {
             $dsn = sprintf(
                 "%s:host=%s;dbname=%s",
-                EnvHelper::get("DB_CONNECTION", "mysql"),
-                EnvHelper::get("DB_HOST", "127.0.0.1"),
-                EnvHelper::get("DB_DATABASE", "forge")
+                getenv("DB_CONNECTION") ?: "mysql",
+                getenv("DB_HOST") ?: "127.0.0.1",
+                getenv("DB_DATABASE") ?: "forge"
             );
 
             $pdo = new \PDO(
                 $dsn,
-                EnvHelper::get("DB_USERNAME", "root"),
-                EnvHelper::get("DB_PASSWORD", "")
+                getenv("DB_USERNAME") ?: "root",
+                getenv("DB_PASSWORD") ?: "root"
             );
             $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
-            return new DatabaseAdapter($pdo);
+            return new \Base\ORM\DatabaseAdapter($pdo);
         });
 
-        $container->bind(SchemaBuilderInterface::class, function ($container) {
-            $adapter = $container->resolve(ORMDatabaseAdapterInterface::class);
+        // Bind BaseSchemaBuilder
+        $container->bind(BaseSchemaBuilder::class, function ($container) {
+            $adapter = $container->resolve(DatabaseAdapterInterface::class);
             return new BaseSchemaBuilder($adapter);
         });
 
+        // Bind MigrationManager
         $container->bind(MigrationManager::class, function ($container) {
-            $adapter = $container->resolve(ORMDatabaseAdapterInterface::class);
-            return new MigrationManager($adapter);
+            $adapter = $container->resolve(DatabaseAdapterInterface::class);
+            $schema = $container->resolve(BaseSchemaBuilder::class);
+            return new MigrationManager($adapter, $schema);
         });
 
-        $container->bind(SeederManager::class, function ($container) {
-            $databaseAdapter = $container->resolve(
-                ORMDatabaseAdapterInterface::class
-            );
-            return new SeederManager($databaseAdapter);
+        // Bind SeederManager
+        $container->bind(SeederManager::class, function (Container $container) {
+            $adapter = $container->resolve(DatabaseAdapterInterface::class);
+            return new SeederManager($adapter);
         });
 
-        $container->bind(OrmManagerInterface::class, function () use (
-            $container
+        // Bind OrmManagerInterface
+        $container->bind(OrmManagerInterface::class, function (
+            Container $container
         ) {
-            $databaseAdapter = $container->resolve(
-                ORMDatabaseAdapterInterface::class
-            );
-            return new \Base\ORM\DefaultOrmManager($databaseAdapter);
+            $adapter = $container->resolve(DatabaseAdapterInterface::class);
+            return new DefaultOrmManager($adapter);
         });
     }
 }

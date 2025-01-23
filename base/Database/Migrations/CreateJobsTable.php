@@ -9,7 +9,8 @@ class CreateJobsTable
     public static function up(): void
     {
         MigrationBuilder::create("jobs", function (Blueprint $table) {
-            $table->bigInteger("id", true)->primary();
+            $table->bigInteger("id", true);
+            $table->primary("id");
             $table->string("queue");
             $table->json("payload");
             $table->integer("attempts")->default(0);
@@ -17,7 +18,7 @@ class CreateJobsTable
             $table->timestamp("reserved_at")->nullable();
             $table
                 ->timestamp("available_at")
-                ->default(DB::raw("CURRENT_TIMESTAMP"));
+                ->default(Blueprint::raw("CURRENT_TIMESTAMP"));
             $table->timestamps();
         });
     }

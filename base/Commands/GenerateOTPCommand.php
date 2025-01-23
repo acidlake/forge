@@ -6,12 +6,12 @@ use Base\Interfaces\OTPManagerInterface;
 
 class GenerateOTPCommand implements CommandInterface
 {
-    // private OTPManagerInterface $otpManager;
+    private OTPManagerInterface $otpManager;
 
-    // public function __construct(OTPManagerInterface $otpManager)
-    // {
-    //     $this->otpManager = $otpManager;
-    // }
+    public function __construct(OTPManagerInterface $otpManager)
+    {
+        $this->otpManager = $otpManager;
+    }
 
     public function getName(): string
     {

@@ -1,9 +1,8 @@
 <?php
-
 namespace Base\Commands;
 
-use Base\Core\CLI;
 use Base\Interfaces\CommandInterface;
+use Base\Core\CLI;
 
 class ListCommand implements CommandInterface
 {
@@ -31,7 +30,5 @@ class ListCommand implements CommandInterface
         foreach ($this->cli->getCommands() as $name => $command) {
             echo "- {$name}: " . $command->getDescription() . "\n";
         }
-
-        echo "\nUse `php forge <command>` to execute a command.\n";
     }
 }

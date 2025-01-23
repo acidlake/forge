@@ -31,12 +31,9 @@ class AuthenticationServiceProvider implements ProviderInterface
             return new JWTMiddleware(jwtManager: $jwtManager);
         });
 
-        $container->bind(OTPManagerInterface::class, function () {
-            /**
-            @var ConfigHelperInterface $configHelper
-            */
-            $configHelper = $this->resolve(ConfigHelperInterface::class);
-            $config = $configHelper::get("auth");
+        $container->bind(OTPManagerInterface::class, function ($container) {
+            $configHelper = $container->resolve(ConfigHelperInterface::class);
+            $config = $configHelper->get("auth");
             return new OTPManager(config: $config);
         });
 

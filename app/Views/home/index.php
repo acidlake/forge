@@ -6,7 +6,7 @@
     <title>{{ $title }}</title>
 </head>
 <body>
-    {dump($user)}
+
     {#include "partials.header"}
 
     <h1>Welcome to {{ $frameworkName }}</h1>
@@ -18,7 +18,6 @@
             {print_r($posts)}
         </pre>
         {#if $isLoggedIn}
-        <!-- TODO: Add support for object type handlers and to get array property like the on bellow next to Welcome back -->
         <p>Welcome back,  {{$user->name}}</p>
         {{ $users["name"] }}
         {:else}
@@ -50,15 +49,7 @@
 
         {Base\Helpers\StringHelper::capitalizeWords("jeremias nunez pozo")}
 
-
-
-
-
         <p>Current date: {date('Y-m-d', 'now')}</p>
-
-        {debug($totalPosts)}
-        {dump($user)}
-
 
         <script>
             var userData = {json($user)};

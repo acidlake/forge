@@ -3,14 +3,21 @@
 namespace Base\Core;
 
 use Base\Database\DatabaseAdapterInterface;
+use Base\Database\BaseMigration;
+use Base\Database\BaseSchemaBuilder;
 
 class MigrationManager
 {
     protected DatabaseAdapterInterface $db;
+    protected BaseSchemaBuilder $schema;
 
-    public function __construct(DatabaseAdapterInterface $db)
-    {
+    public function __construct(
+        DatabaseAdapterInterface $db,
+        BaseSchemaBuilder $schema
+    ) {
         $this->db = $db;
+        $this->schema = $schema;
+        MigrationBuilder::init($db);
     }
 
     public function run(): void
@@ -20,7 +27,7 @@ class MigrationManager
         $migrations = $this->getPendingMigrations();
         foreach ($migrations as $migration) {
             echo "Running migration: {$migration["name"]}...\n";
-            $instance = new ($migration["class"])();
+            $instance = $this->instantiateMigration($migration["class"]);
             $instance->up();
             $this->markMigrationAsRun($migration["name"]);
         }
@@ -33,7 +40,7 @@ class MigrationManager
         $migrations = $this->getLastBatchMigrations();
         foreach ($migrations as $migration) {
             echo "Rolling back migration: {$migration["name"]}...\n";
-            $instance = new ($migration["class"])();
+            $instance = $this->instantiateMigration($migration["class"]);
             $instance->down();
             $this->markMigrationAsRolledBack($migration["name"]);
         }
@@ -53,28 +60,57 @@ class MigrationManager
 
     protected function getPendingMigrations(): array
     {
-        $migrationsPath = CONFIG_PATH . "/migrations/";
-        $files = glob("{$migrationsPath}/*.php");
+        $basePath = BASE_PATH . "/base/Database/Migrations/";
+        $appPath = BASE_PATH . "/app/Database/Migrations/";
+
+        $migrations = array_merge(
+            $this->scanDirectory($basePath, "Base\\Database\\Migrations"),
+            $this->scanDirectory($appPath, "App\\Database\\Migrations")
+        );
 
         $pending = [];
-        foreach ($files as $file) {
-            $name = basename($file, ".php");
-            $className = $this->getClassNameFromFile($file);
-
-            if (!$this->isMigrationRun($name)) {
-                $pending[] = [
-                    "name" => $name,
-                    "class" => $className,
-                ];
+        foreach ($migrations as $migration) {
+            if (!$this->isMigrationRun($migration["name"])) {
+                $pending[] = $migration;
             }
         }
 
         return $pending;
     }
 
+    protected function scanDirectory(string $path, string $namespace): array
+    {
+        if (!is_dir($path)) {
+            return [];
+        }
+
+        $files = glob("{$path}/*.php");
+        $migrations = [];
+        foreach ($files as $file) {
+            $name = basename($file, ".php");
+            $className = "{$namespace}\\{$name}";
+            $migrations[] = [
+                "name" => $name,
+                "class" => $className,
+            ];
+        }
+
+        return $migrations;
+    }
+
+    protected function instantiateMigration(string $className): BaseMigration
+    {
+        if (!class_exists($className)) {
+            throw new \RuntimeException(
+                "Migration class {$className} not found."
+            );
+        }
+
+        return new $className($this->db, $this->schema);
+    }
+
     protected function getLastBatchMigrations(): array
     {
-        // Get the latest batch
         $batch = $this->db->fetchOne(
             "SELECT MAX(batch) AS batch FROM migrations"
         )["batch"];
@@ -112,11 +148,5 @@ class MigrationManager
             "SELECT MAX(batch) AS batch FROM migrations"
         );
         return $result["batch"] ?? 0;
-    }
-
-    private function getClassNameFromFile(string $filePath): string
-    {
-        $relativePath = str_replace(BASE_PATH . "/", "", $filePath);
-        return str_replace(["/", ".php"], ["\\", ""], $relativePath);
     }
 }

@@ -7,6 +7,7 @@ use Base\Interfaces\BlueprintInterface;
 class Blueprint implements BlueprintInterface
 {
     protected array $columns = [];
+    protected ?string $lastColumn = null;
 
     /**
      * Adds a string (VARCHAR) column to the schema.
@@ -142,6 +143,7 @@ class Blueprint implements BlueprintInterface
     {
         $unsignedSql = $unsigned ? " UNSIGNED" : "";
         $this->columns[] = "`{$name}` INT{$unsignedSql}";
+        $this->lastColumn = $name;
         return $this;
     }
 
@@ -288,30 +290,65 @@ class Blueprint implements BlueprintInterface
     }
 
     /**
-     * Makes a column nullable.
+     * Makes the last defined column nullable.
      *
-     * @param string $name The name of the column.
-     * @param string $type The type of the column.
      * @return $this
+     * @throws \RuntimeException If no column is defined to set as nullable.
      */
-    public function nullable(string $name, string $type): self
+    public function nullable(): self
     {
-        $this->columns[] = "`{$name}` {$type} NULL";
+        if (!$this->lastColumn) {
+            throw new \RuntimeException(
+                "No column defined to set as nullable."
+            );
+        }
+
+        // Modify the last column definition to include NULL
+        $lastIndex = count($this->columns) - 1;
+        $this->columns[$lastIndex] .= " NULL";
+
         return $this;
     }
 
     /**
-     * Sets a default value for a column.
+     * Adds a raw SQL expression.
      *
-     * @param string $name The name of the column.
-     * @param string $type The type of the column.
+     * @param string $expression The raw SQL expression.
+     * @return string
+     */
+    public static function raw(string $expression): string
+    {
+        return $expression;
+    }
+
+    /**
+     * Sets a default value for the last defined column.
+     *
      * @param mixed $default The default value for the column.
      * @return $this
+     * @throws \RuntimeException If no column is defined to set a default value.
      */
-    public function default(string $name, string $type, mixed $default): self
+    public function default(mixed $default): self
     {
-        $defaultValue = is_string($default) ? "'{$default}'" : $default;
-        $this->columns[] = "`{$name}` {$type} DEFAULT {$defaultValue}";
+        if (!$this->lastColumn) {
+            throw new \RuntimeException(
+                "No column defined to set default value."
+            );
+        }
+
+        // Modify the last column definition to include the default value
+        $lastIndex = count($this->columns) - 1;
+        if (
+            is_string($default) &&
+            strpos($default, "CURRENT_TIMESTAMP") !== false
+        ) {
+            // Handle raw SQL expressions
+            $this->columns[$lastIndex] .= " DEFAULT " . $default;
+        } else {
+            $this->columns[$lastIndex] .=
+                " DEFAULT " . (is_string($default) ? "'{$default}'" : $default);
+        }
+
         return $this;
     }
 

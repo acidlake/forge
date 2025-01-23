@@ -3,13 +3,11 @@
 namespace Base\Core;
 
 use Base\Providers\AuthenticationServiceProvider;
-use Base\Providers\CommandLoaderServiceProvider;
 use Base\Providers\CommandServiceProvider;
 use Base\Providers\ConfigurationServiceProvider;
 use Base\Providers\DatabaseServiceProvider;
 use Base\Providers\EnvironmentServiceProvider;
 use Base\Providers\LogServiceProvider;
-use Base\Providers\LoggerServiceProvider;
 use Base\Providers\ModelServiceProvider;
 use Base\Providers\NotificationServiceProvider;
 use Base\Providers\RouterServiceProvider;
@@ -48,19 +46,17 @@ class CoreServiceProvider extends ServiceProvider
     public function register(Container $container): void
     {
         (new EnvironmentServiceProvider())->register($container);
-        (new CommandServiceProvider())->register($container);
-        (new CommandLoaderServiceProvider())->register($container);
+        (new ConfigurationServiceProvider())->register($container);
+        (new UtilityServiceProvider())->register($container);
         (new LogServiceProvider())->register($container);
-        (new LoggerServiceProvider())->register($container);
-        (new AuthenticationServiceProvider())->register($container);
         (new DatabaseServiceProvider())->register($container);
         (new ModelServiceProvider())->register($container);
         (new RouterServiceProvider())->register($container);
         (new StorageServiceProvider())->register($container);
         (new NotificationServiceProvider())->register($container);
-        (new ConfigurationServiceProvider())->register($container);
-        (new UtilityServiceProvider())->register($container);
-        (new ViewServiceProvider())->register($container);
+        (new AuthenticationServiceProvider())->register($container);
         (new UUIdServiceProvider())->register($container);
+        (new ViewServiceProvider())->register($container);
+        (new CommandServiceProvider())->register($container);
     }
 }

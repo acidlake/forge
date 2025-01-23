@@ -26,6 +26,7 @@ Base\Tools\EnvLoader::load(ENV_PATH);
 require_once "../base/Core/Autoloader.php";
 Base\Core\Autoloader::register();
 
+use Base\Core\Container;
 use Base\Core\ContainerHelper;
 use Base\Core\ProviderLoader;
 use Base\Core\CoreServiceProvider;
@@ -37,8 +38,9 @@ use Base\Exceptions\ExceptionHandler;
 // Set a global exception handler
 set_exception_handler([ExceptionHandler::class, "handle"]);
 
-// Get the Dependency Injection (DI) container
-$container = ContainerHelper::getContainer();
+// Create the container and set it in ContainerHelper
+$container = new Container();
+ContainerHelper::setContainer($container);
 
 /**
  * Load and register the core service provider.

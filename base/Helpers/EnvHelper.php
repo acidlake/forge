@@ -86,8 +86,11 @@ class EnvHelper
      *
      * @return mixed
      */
-    public static function get(string $key, mixed $default = null): mixed
-    {
+    public static function get(
+        string $key,
+        mixed $default = null,
+        bool $asArray = false
+    ): mixed {
         $value = $_ENV[$key] ?? ($_SERVER[$key] ?? getenv($key));
         if (!$value) {
             error_log(
@@ -95,11 +98,12 @@ class EnvHelper
             );
         }
 
-        // Check for comma-separated list (array)
-        if ($value && strpos($value, ",") !== false) {
+        // If requesting as an array and the value contains a comma, parse it
+        if ($asArray && $value && strpos($value, ",") !== false) {
             return array_map("trim", explode(",", $value));
         }
 
+        // Return raw value or default
         return $value ?: $default;
     }
 
@@ -151,5 +155,24 @@ class EnvHelper
         $newContents = implode(PHP_EOL, $envContents) . PHP_EOL;
 
         return file_put_contents(ENV_PATH, $newContents) !== false;
+    }
+
+    public static function getPath(
+        string $key,
+        string $default,
+        string $basePath
+    ): string {
+        $path = self::get($key, $default);
+
+        // Resolve path to absolute
+        if (!PathHelper::isAbsolute($path)) {
+            $path = PathHelper::normalize(
+                $basePath .
+                    DIRECTORY_SEPARATOR .
+                    ltrim($path, DIRECTORY_SEPARATOR)
+            );
+        }
+
+        return rtrim($path, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
     }
 }

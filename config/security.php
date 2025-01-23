@@ -28,7 +28,10 @@ return [
      *
      * @var string
      */
-    "ipwhitelist" => EnvHelper::get("IP_WHITELIST", "127.0.0.1, 192.168.1.1"),
+    "ipwhitelist" => EnvHelper::get(
+        "IP_WHITELIST_ADDRESSES",
+        "127.0.0.1, 192.168.1.1"
+    ),
 
     "rate_limit_max_request" => EnvHelper::get("RATE_LIMIT_MAX_REQUESTS", 6),
     "rate_limit_time_frame" => EnvHelper::get("RATE_LIMIT_TIME_FRAME", 60),
