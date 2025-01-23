@@ -22,13 +22,13 @@ class BaseApiController implements BaseApiControllerInterface
      * @param mixed $data The data to return in the response.
      * @param string $message A message describing the success.
      * @param array $meta Optional metadata to include in the response.
-     * @return array The formatted success response.
+     * @return void
      */
     public function success(
         $data = [],
         string $message = "Success",
         $meta = []
-    ): array {
+    ): void {
         /**
          * @var ModelSerializerHelperInterface $serializer
          */
@@ -47,18 +47,48 @@ class BaseApiController implements BaseApiControllerInterface
     }
 
     /**
+     * Respond with a paginated success message and data.
+     *
+     * @param array $paginationData The paginated data and metadata.
+     * @param string $message A message describing the success.
+     * @return void
+     */
+    public function paginatedSuccess(
+        array $paginationData,
+        string $message = "Success"
+    ): void {
+        /**
+         * @var ModelSerializerHelperInterface $serializer
+         */
+        $serializer = $this->resolve(ModelSerializerHelperInterface::class);
+
+        $data = $serializer::serialize($paginationData["data"]);
+        $pagination = $paginationData["pagination"] ?? [];
+
+        echo json_encode([
+            "success" => true,
+            "data" => $data,
+            "message" => $message,
+            "meta" => $pagination,
+            "errors" => null,
+        ]);
+
+        exit();
+    }
+
+    /**
      * Respond with an error message.
      *
      * @param string $message A message describing the error.
      * @param int $code The HTTP status code for the response. Defaults to 400.
      * @param mixed $errors Additional error details or context.
-     * @return array The formatted error response.
+     * @return void
      */
     public function error(
         string $message,
         int $code = 400,
         $errors = null
-    ): array {
+    ): void {
         if (!in_array($code, [400, 422, 500, 403, 404], true)) {
             $code = 400;
         }
@@ -80,11 +110,11 @@ class BaseApiController implements BaseApiControllerInterface
      * Respond with a validation error message.
      *
      * @param array $errors An array of validation errors.
-     * @return array The formatted validation error response.
+     * @return void
      */
-    public function validationError(array $errors): array
+    public function validationError(array $errors): void
     {
-        return $this->error("Validation failed", 422, $errors);
+        $this->error("Validation failed", 422, $errors);
     }
 
     /**
@@ -100,7 +130,7 @@ class BaseApiController implements BaseApiControllerInterface
         } catch (ValidationException $e) {
             $errors = $e->getErrors();
             $formattedErrors = $this->formatValidationErrors($errors);
-            return $this->validationError($formattedErrors);
+            $this->validationError($formattedErrors);
         }
     }
 

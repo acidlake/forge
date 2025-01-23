@@ -3,18 +3,26 @@
 namespace Base\ORM;
 
 use Base\Database\DatabaseAdapterInterface;
+use Base\Helpers\PaginationHelper;
 
 class DefaultOrmManager implements OrmManagerInterface
 {
     protected string $table;
     protected array $conditions = [];
     protected bool $noSqlMode = false;
+    protected ?BaseModelInterface $model = null;
 
     public function __construct(protected DatabaseAdapterInterface $db) {}
 
     public function setTable(string $table): self
     {
         $this->table = $table;
+        return $this;
+    }
+
+    public function setModel(BaseModelInterface $model): self
+    {
+        $this->model = $model;
         return $this;
     }
 
@@ -98,6 +106,37 @@ class DefaultOrmManager implements OrmManagerInterface
         return $this;
     }
 
+    public function paginate(int $perPage = 10, int $currentPage = 1): array
+    {
+        $offset = ($currentPage - 1) * $perPage;
+        $whereClause = $this->buildWhereClause();
+
+        // Dynamically inject LIMIT and OFFSET into the query string
+        $query = "SELECT * FROM {$this->table} {$whereClause} LIMIT {$perPage} OFFSET {$offset}";
+        $countQuery = "SELECT COUNT(*) AS total FROM {$this->table} {$whereClause}";
+
+        // Total count of rows
+        $total = $this->db->fetch($countQuery, $this->conditions)["total"];
+
+        // Paginated rows
+        $rows = array_map(
+            fn($row) => (object) $row,
+            $this->db->fetchAll($query, $this->conditions)
+        );
+
+        // Pagination metadata
+        $pagination = PaginationHelper::paginate(
+            $total,
+            $perPage,
+            $currentPage
+        );
+
+        return [
+            "data" => $rows,
+            "pagination" => $pagination,
+        ];
+    }
+
     private function buildWhereClause(): string
     {
         $clauses = [];
@@ -111,8 +150,15 @@ class DefaultOrmManager implements OrmManagerInterface
             }
         }
 
-        if (!isset($this->conditions["deleted_at"])) {
-            $clauses[] = "deleted_at IS NULL";
+        // Check if the model uses soft deletes
+        if (
+            $this->model &&
+            method_exists($this->model, "usesSoftDeletes") &&
+            $this->model->usesSoftDeletes()
+        ) {
+            if (!isset($this->conditions["deleted_at"])) {
+                $clauses[] = "deleted_at IS NULL";
+            }
         }
 
         return $clauses ? "WHERE " . implode(" AND ", $clauses) : "";

@@ -58,6 +58,8 @@ abstract class BaseModel implements BaseModelInterface
         if (isset($this->table)) {
             $this->orm->setTable($this->table);
         }
+
+        $this->orm->setModel($this);
     }
 
     /**
@@ -99,6 +101,18 @@ abstract class BaseModel implements BaseModelInterface
     protected function _all(): array
     {
         return $this->orm->all();
+    }
+
+    public static function paginate(
+        int $perPage = 10,
+        int $currentPage = 1
+    ): array {
+        return static::resolve()->_paginate($perPage, $currentPage);
+    }
+
+    protected function _paginate(int $perPage, int $currentPage): array
+    {
+        return $this->orm->paginate($perPage, $currentPage);
     }
 
     /**
@@ -271,5 +285,16 @@ abstract class BaseModel implements BaseModelInterface
             fn($key) => in_array($key, $this->fillable),
             ARRAY_FILTER_USE_KEY
         );
+    }
+
+    /**
+     * Determine if the model uses soft deletes.
+     *
+     * @return bool
+     */
+    public function usesSoftDeletes(): bool
+    {
+        return property_exists($this, "usesSoftDeletes") &&
+            $this->usesSoftDeletes;
     }
 }

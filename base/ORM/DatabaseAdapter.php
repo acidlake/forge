@@ -33,6 +33,13 @@ class DatabaseAdapter implements
      */
     public function fetchAll(string $query, array $bindings = []): array
     {
+        if (isset($bindings["limit"])) {
+            $bindings["limit"] = (int) $bindings["limit"];
+        }
+        if (isset($bindings["offset"])) {
+            $bindings["offset"] = (int) $bindings["offset"];
+        }
+
         $stmt = $this->pdo->prepare($query);
         $stmt->execute($bindings);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -43,6 +50,13 @@ class DatabaseAdapter implements
      */
     public function execute(string $query, array $bindings = []): bool
     {
+        if (isset($bindings["limit"])) {
+            $bindings["limit"] = (int) $bindings["limit"];
+        }
+        if (isset($bindings["offset"])) {
+            $bindings["offset"] = (int) $bindings["offset"];
+        }
+
         $stmt = $this->pdo->prepare($query);
         return $stmt->execute($bindings);
     }

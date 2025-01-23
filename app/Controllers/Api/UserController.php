@@ -12,9 +12,11 @@ class UserController extends BaseApiController
 
     public function index(): array
     {
-        $users = User::all();
+        $page = 1;
+        $perPage = 10;
+        $users = User::paginate($perPage, $page);
 
-        return $this->success($users, "User list retrieved");
+        return $this->paginatedSuccess($users, "User list retrieved");
     }
 
     public function store(Request $request): array
