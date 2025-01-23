@@ -1,16 +1,50 @@
 <?php
 namespace Base\ORM;
 
+use Base\Database\DatabaseAdapterInterface;
 use Base\Interfaces\ORMDatabaseAdapterInterface;
 use PDO;
 
-class DatabaseAdapter implements ORMDatabaseAdapterInterface
+class DatabaseAdapter implements
+    ORMDatabaseAdapterInterface,
+    DatabaseAdapterInterface
 {
     private PDO $pdo;
 
     public function __construct(PDO $pdo)
     {
         $this->pdo = $pdo;
+    }
+
+    /**
+     * Fetch a single record.
+     */
+    public function fetch(string $query, array $bindings = []): array
+    {
+        $stmt = $this->pdo->prepare($query);
+        $stmt->execute($bindings);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $result ?: [];
+    }
+
+    /**
+     * Fetch all records.
+     */
+    public function fetchAll(string $query, array $bindings = []): array
+    {
+        $stmt = $this->pdo->prepare($query);
+        $stmt->execute($bindings);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Execute a query (e.g., INSERT, UPDATE, DELETE).
+     */
+    public function execute(string $query, array $bindings = []): bool
+    {
+        $stmt = $this->pdo->prepare($query);
+        return $stmt->execute($bindings);
     }
 
     public function query(string $sql, array $params = []): mixed

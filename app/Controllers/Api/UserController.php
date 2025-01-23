@@ -12,15 +12,12 @@ class UserController extends BaseApiController
 
     public function index(): array
     {
-        /**
-        @var User $users
-        */
         $users = User::all();
 
         return $this->success($users, "User list retrieved");
     }
 
-    public function store(Request $request): array
+    public function store(Request $request, User $user): array
     {
         $data = $this->handleValidation(function () use ($request) {
             return $request->validate([
@@ -28,10 +25,8 @@ class UserController extends BaseApiController
             ]);
         });
 
-        $user = new User();
-        $user->fill($data);
-        $user->save();
+        $newUser = $user->save($data);
 
-        return $this->success($user, "User created successfully");
+        return $this->success($newUser, "User created successfully");
     }
 }

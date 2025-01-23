@@ -51,9 +51,13 @@ class HomeController
          */
         $view = $this->resolve(ViewInterface::class);
 
-        //
+        /**
+         * Resolve the ViewInterface instance from the DI container.
+         *
+         * @var User $user
+         */
         $user = User::find(1);
-
+        print_r($user->name);
         /**
          * @var JWTInterface $jwt
          */

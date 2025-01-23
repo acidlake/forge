@@ -37,7 +37,9 @@ use Base\Notifications\Drivers\EmailDriver;
 use Base\Notifications\Drivers\PushDriver;
 use Base\Notifications\Drivers\SMSDriver;
 use Base\Notifications\NotificationManager;
+use Base\ORM\BaseModelInterface;
 use Base\ORM\DatabaseAdapter;
+use Base\ORM\OrmManagerInterface;
 use Base\Router\Http\Request;
 use Base\Router\Http\Response;
 use Base\Storage\Drivers\DatabaseStorageDriver;
@@ -93,6 +95,8 @@ class CoreServiceProvider extends ServiceProvider
             )
         );
 
+        $this->registerModels($container);
+
         // Register the logger
         $container->bind(LoggerInterface::class, function () {
             // Create a Monolog instance with a StreamHandler
@@ -143,6 +147,16 @@ class CoreServiceProvider extends ServiceProvider
                 APP_CONFIG_PATH,
                 ENV_PATH
             );
+        });
+
+        // Register OrmManager
+        $container->bind(OrmManagerInterface::class, function () use (
+            $container
+        ) {
+            $databaseAdapter = $container->resolve(
+                ORMDatabaseAdapterInterface::class
+            );
+            return new \Base\ORM\DefaultOrmManager($databaseAdapter);
         });
 
         // Register database bindings
@@ -290,5 +304,64 @@ class CoreServiceProvider extends ServiceProvider
                 "App\\Adapters\\Response"
             )
         );
+
+        // Uuid Strategies
+        $container->bind(\Base\Tools\UuidManager::class, function () {
+            $manager = new \Base\Tools\UuidManager();
+
+            // Auto-discover user-defined strategies
+            foreach (glob(BASE_PATH . "/app/UuidStrategies/*.php") as $file) {
+                $className = "App\\UuidStrategies\\" . basename($file, ".php");
+                if (
+                    class_exists($className) &&
+                    is_subclass_of(
+                        $className,
+                        \Base\Interfaces\UuidStrategyInterface::class
+                    )
+                ) {
+                    $strategy = new $className();
+                    $manager->register($strategy->getName(), $strategy);
+                }
+            }
+
+            return $manager;
+        });
+    }
+
+    /**
+     * Automatically register all models in the app/Models directory.
+     *
+     * @param Container $container
+     * @return void
+     */
+    private function registerModels(Container $container): void
+    {
+        $modelsPath = BASE_PATH . "/app/Models";
+
+        if (!is_dir($modelsPath)) {
+            return;
+        }
+
+        foreach (glob("{$modelsPath}/*.php") as $file) {
+            $className = "App\\Models\\" . basename($file, ".php");
+
+            if (
+                class_exists($className) &&
+                is_subclass_of($className, BaseModelInterface::class)
+            ) {
+                // Register the model in the container
+                $container->bind($className, function () use (
+                    $container,
+                    $className
+                ) {
+                    $orm = $container->resolve(OrmManagerInterface::class);
+                    $uuidManager = $container->resolve(
+                        \Base\Tools\UuidManager::class
+                    );
+
+                    return new $className($orm, $uuidManager);
+                });
+            }
+        }
     }
 }
