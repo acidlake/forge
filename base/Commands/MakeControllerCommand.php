@@ -3,7 +3,6 @@
 namespace Base\Commands;
 
 use Base\Interfaces\CommandInterface;
-use Base\Tools\ConfigHelper;
 
 class MakeControllerCommand implements CommandInterface
 {
@@ -17,36 +16,83 @@ class MakeControllerCommand implements CommandInterface
         return "Create a new controller class.";
     }
 
-    public function execute(array $arguments = []): void
+    public function execute(array $args = []): void
     {
-        $controllerName = $arguments[0] ?? null;
+        // Ensure the controller name is provided
+        $controllerName = $args[0] ?? null;
 
         if (!$controllerName) {
             echo "Error: Controller name is required.\n";
             return;
         }
 
-        // Get controller path from configuration
-        $config = ConfigHelper::get("structure.controllers", "app/Controllers");
-        $directory = BASE_PATH . "/" . $config;
+        $controllerName = ucfirst($controllerName); // Capitalize the first letter
 
-        // Ensure the directory exists
-        if (!is_dir($directory)) {
-            mkdir($directory, 0755, true);
+        // Check for the --resource flag and determine namespace
+        $isResource = in_array("--resource", $args, true);
+        $namespace = "App\\Controllers";
+        if ($isResource) {
+            $namespace .= "\\Resources";
         }
 
-        $filePath = "{$directory}/{$controllerName}.php";
-        $namespace = str_replace("/", "\\", $config);
+        $path =
+            BASE_PATH .
+            "/" .
+            str_replace("\\", "/", $namespace) .
+            "/$controllerName.php";
 
-        $template = <<<PHP
+        // Ensure the directory exists
+        if (!is_dir(dirname($path))) {
+            mkdir(dirname($path), 0755, true);
+        }
+
+        // Generate the controller content
+        $controllerContent = $this->getControllerContent(
+            $controllerName,
+            $namespace,
+            $isResource
+        );
+
+        // Check if the file already exists
+        if (file_exists($path)) {
+            echo "The controller $controllerName already exists at $path. \n";
+            return;
+        }
+
+        // Write the controller to the file
+        file_put_contents($path, $controllerContent);
+
+        echo "Controller $controllerName created successfully at $path. \n";
+    }
+
+    private function getControllerContent(
+        string $controllerName,
+        string $namespace,
+        bool $isResource
+    ): string {
+        $methods = $isResource
+            ? $this->getResourceMethods()
+            : $this->getDefaultIndexMethod();
+
+        return <<<PHP
 <?php
 
-namespace {$namespace};
+namespace $namespace;
 
+use Base\Controllers\BaseApiController;
+use Base\Interfaces\RequestInterface as Request;
 use Base\Interfaces\ViewInterface;
 
-class {$controllerName}
+class $controllerName extends BaseApiController
 {
+    $methods
+}
+PHP;
+    }
+
+    private function getDefaultIndexMethod(): string
+    {
+        return <<<PHP
     /**
      * Display a listing of the resource.
      *
@@ -60,74 +106,74 @@ class {$controllerName}
             'message' => 'This is a generated controller.',
         ]);
     }
+PHP;
+    }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return void
-     */
-    public function create(): void
+    private function getResourceMethods(): string
     {
-        // Add logic for creating a resource.
+        return <<<PHP
+    /**
+     * Display a listing of the resource.
+     *
+     * @param ViewInterface \$view
+     * @return string
+     */
+    public function index(ViewInterface \$view): string
+    {
+        return \$view->render('default.index', [
+            'title' => 'Resource Index',
+            'message' => 'This is a resource index method.',
+        ]);
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @return void
+     * @param Request \$request
+     * @return array
      */
-    public function store(): void
+    public function store(Request \$request): array
     {
-        // Add logic for storing a resource.
+        // TODO: Implement store method
+        return [];
     }
 
     /**
      * Display the specified resource.
      *
-     * @param int \$id
-     * @return void
+     * @param string \$id
+     * @return array
      */
-    public function show(int \$id): void
+    public function show(string \$id): array
     {
-        // Add logic for displaying a specific resource.
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param int \$id
-     * @return void
-     */
-    public function edit(int \$id): void
-    {
-        // Add logic for editing a resource.
+        // TODO: Implement show method
+        return [];
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param int \$id
-     * @return void
+     * @param Request \$request
+     * @param string \$id
+     * @return array
      */
-    public function update(int \$id): void
+    public function update(Request \$request, string \$id): array
     {
-        // Add logic for updating a resource.
+        // TODO: Implement update method
+        return [];
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param int \$id
-     * @return void
+     * @param string \$id
+     * @return bool
      */
-    public function destroy(int \$id): void
+    public function destroy(string \$id): bool
     {
-        // Add logic for deleting a resource.
+        // TODO: Implement destroy method
+        return false;
     }
-}
 PHP;
-
-        file_put_contents($filePath, $template);
-        echo "Controller created: {$filePath}\n";
     }
 }

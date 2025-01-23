@@ -1,4 +1,5 @@
 <?php
+
 namespace Base\ORM;
 
 use Base\Core\ContainerAwareTrait;
@@ -7,19 +8,47 @@ use Base\ORM\BaseModelInterface;
 use Base\ORM\OrmManagerInterface;
 use Base\Tools\UuidManager;
 
+/**
+ * BaseModel
+ *
+ * Abstract class providing ORM features for models.
+ * Models extending this class gain functionality for interacting with the database.
+ */
 abstract class BaseModel implements BaseModelInterface
 {
     use ContainerAwareTrait;
 
+    /**
+     * @var string $table The table name associated with the model.
+     */
     protected string $table;
-    protected bool $uuid = false; // Default UUID setting from the model
+
+    /**
+     * @var bool $uuid Whether UUIDs are enabled for this model.
+     */
+    protected bool $uuid = false;
+
+    /**
+     * @var string $keyStrategy The strategy for generating UUIDs.
+     */
     protected string $keyStrategy = "uuidv4";
+
+    /**
+     * @var array $fillable Fields that can be mass assigned.
+     */
     protected array $fillable = [];
-    private ?bool $runtimeUuid = null; // Override flag for UUID
+
+    /**
+     * @var ?bool $runtimeUuid Runtime override for enabling/disabling UUIDs.
+     */
+    private ?bool $runtimeUuid = null;
 
     protected OrmManagerInterface $orm;
     protected UuidManager $uuidManager;
 
+    /**
+     * Constructor initializes dependencies and sets the table name in the ORM.
+     */
     public function __construct()
     {
         $container = $this->getContainer();
@@ -30,6 +59,7 @@ abstract class BaseModel implements BaseModelInterface
             $this->orm->setTable($this->table);
         }
     }
+
     /**
      * Get the container instance.
      *
@@ -52,7 +82,7 @@ abstract class BaseModel implements BaseModelInterface
     }
 
     /**
-     * Static proxy for `all`.
+     * Retrieve all records from the database.
      *
      * @return array
      */
@@ -62,7 +92,7 @@ abstract class BaseModel implements BaseModelInterface
     }
 
     /**
-     * Retrieve all records.
+     * Retrieve all records (non-static implementation).
      *
      * @return array
      */
@@ -72,7 +102,7 @@ abstract class BaseModel implements BaseModelInterface
     }
 
     /**
-     * Static proxy for `find`.
+     * Find a record by its ID.
      *
      * @param string|int $id
      * @return object|null
@@ -83,7 +113,7 @@ abstract class BaseModel implements BaseModelInterface
     }
 
     /**
-     * Find a record by ID.
+     * Find a record by its ID (non-static implementation).
      *
      * @param string|int $id
      * @return object|null
@@ -94,7 +124,7 @@ abstract class BaseModel implements BaseModelInterface
     }
 
     /**
-     * Static proxy for `findBy`.
+     * Find a record by a specific field.
      *
      * @param string $field
      * @param mixed $value
@@ -106,7 +136,7 @@ abstract class BaseModel implements BaseModelInterface
     }
 
     /**
-     * Find a record by a specific field.
+     * Find a record by a specific field (non-static implementation).
      *
      * @param string $field
      * @param mixed $value
@@ -117,10 +147,8 @@ abstract class BaseModel implements BaseModelInterface
         return $this->orm->findBy($field, $value);
     }
 
-    // Other methods (find, findBy, all)...
-
     /**
-     * Static proxy for `where`.
+     * Apply conditions to a query.
      *
      * @param array $conditions
      * @return static
@@ -131,7 +159,7 @@ abstract class BaseModel implements BaseModelInterface
     }
 
     /**
-     * Apply conditions to a query.
+     * Apply conditions to a query (non-static implementation).
      *
      * @param array $conditions
      * @return static
@@ -142,6 +170,12 @@ abstract class BaseModel implements BaseModelInterface
         return $this;
     }
 
+    /**
+     * Set the table name for the model.
+     *
+     * @param string $table
+     * @return $this
+     */
     public function setTable(string $table): self
     {
         $this->table = $table;
@@ -149,11 +183,16 @@ abstract class BaseModel implements BaseModelInterface
         return $this;
     }
 
+    /**
+     * Save the given data to the database.
+     *
+     * @param array $data
+     * @return object
+     */
     public function save(array $data): object
     {
         $data = $this->sanitizeInput($data);
 
-        // Handle UUID generation if enabled and no ID is provided
         if ($this->isUuidEnabled() && !isset($data["id"])) {
             $data["id"] = $this->uuidManager->generate($this->keyStrategy);
         }
@@ -167,17 +206,22 @@ abstract class BaseModel implements BaseModelInterface
             }
         }
 
-        // Pass the processed data to the ORM for insertion
         return $this->orm->insert($data);
     }
 
+    /**
+     * Delete a record by its ID.
+     *
+     * @param string|int $id
+     * @return bool
+     */
     public function delete(string|int $id): bool
     {
         return $this->orm->delete($id);
     }
 
     /**
-     * Enable or disable UUID at runtime.
+     * Enable or disable UUID generation for the model.
      *
      * @param bool $enable
      * @return $this
@@ -189,7 +233,7 @@ abstract class BaseModel implements BaseModelInterface
     }
 
     /**
-     * Determine if UUIDs are enabled for the model.
+     * Check if UUID generation is enabled for the model.
      *
      * @return bool
      */
@@ -198,11 +242,24 @@ abstract class BaseModel implements BaseModelInterface
         return $this->runtimeUuid !== null ? $this->runtimeUuid : $this->uuid;
     }
 
+    /**
+     * Execute a raw query.
+     *
+     * @param string $query
+     * @param array $bindings
+     * @return mixed
+     */
     public function rawQuery(string $query, array $bindings = []): mixed
     {
         return $this->orm->rawQuery($query, $bindings);
     }
 
+    /**
+     * Sanitize input data based on the fillable fields.
+     *
+     * @param array $data
+     * @return array
+     */
     private function sanitizeInput(array $data): array
     {
         if (empty($this->fillable)) {

@@ -3,7 +3,7 @@
 namespace Base\Commands;
 
 use Base\Interfaces\CommandInterface;
-use Base\Tools\ConfigHelper;
+use Base\Helpers\StringHelper;
 
 class MakeModelCommand implements CommandInterface
 {
@@ -17,62 +17,80 @@ class MakeModelCommand implements CommandInterface
         return "Create a new model class.";
     }
 
-    public function execute(array $arguments = []): void
+    public function execute(array $args = []): void
     {
-        $modelName = $arguments[0] ?? null;
+        // Ensure the model name is provided
+        $modelName = $args[0] ?? null;
 
         if (!$modelName) {
             echo "Error: Model name is required.\n";
             return;
         }
 
-        // Get model path from configuration
-        $config = ConfigHelper::get("structure.models", "app/Models");
-        $directory = BASE_PATH . "/" . $config;
+        $modelName = ucfirst($modelName); // Capitalize the first letter
+        $namespace = $args[1] ?? "App\\Models"; // Default namespace
+        $path =
+            BASE_PATH .
+            "/" .
+            str_replace("\\", "/", $namespace) .
+            "/$modelName.php";
 
         // Ensure the directory exists
-        if (!is_dir($directory)) {
-            mkdir($directory, 0755, true);
+        if (!is_dir(dirname($path))) {
+            mkdir(dirname($path), 0755, true);
         }
 
-        $filePath = "{$directory}/{$modelName}.php";
-        $namespace = str_replace("/", "\\", $config);
+        // Generate the model content
+        $modelContent = $this->getModelContent($modelName, $namespace);
 
-        $template = <<<PHP
+        // Check if the file already exists
+        if (file_exists($path)) {
+            echo "The model $modelName already exists at $path. \n";
+            return;
+        }
+
+        // Write the model to the file
+        file_put_contents($path, $modelContent);
+
+        echo "Model $modelName created successfully at $path. \n";
+    }
+
+    private function getModelContent(
+        string $modelName,
+        string $namespace
+    ): string {
+        return <<<PHP
 <?php
 
-namespace {$namespace};
+namespace $namespace;
 
-use Base\Core\BaseModel;
+use Base\ORM\BaseModel;
 
-class {$modelName} extends BaseModel
+/**
+ * $modelName Model
+ *
+ * Represents the {$modelName}s table in the database.
+ *
+ * @property string \$id
+ * @property string \$name
+ */
+class $modelName extends BaseModel
 {
-    /**
-     * Table name associated with the model.
-     *
-     * @var string
-     */
-    protected string \$table = 'table_name';
+    protected string \$table = "{$this->toSnakeCase(
+            $modelName
+        )}s"; // Table name
+    protected bool \$uuid = false; // Set to true if using UUIDs
+    protected string \$keyStrategy = "uuidv4"; // UUID strategy (if applicable)
+    protected array \$fillable = ["id", "name"]; // Fillable attributes
 
-    /**
-     * Indicates if UUID should be used as the primary key.
-     *
-     * @var bool
-     */
-    protected bool \$uuid = false;
-
-    /**
-     * Fillable fields for mass assignment.
-     *
-     * @var array
-     */
-    protected array \$fillable = [
-        // Add your fillable fields here.
-    ];
+    public string \$id;
+    public string \$name;
 }
 PHP;
+    }
 
-        file_put_contents($filePath, $template);
-        echo "Model created: {$filePath}\n";
+    private function toSnakeCase(string $input): string
+    {
+        return StringHelper::toSnakeCase($input);
     }
 }

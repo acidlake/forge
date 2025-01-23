@@ -2,14 +2,23 @@
 
 namespace Base\Core;
 
-use Base\Interfaces\BlueprintInterface;
 use Base\Core\Blueprint;
 use Base\Database\DatabaseAdapterInterface;
 
 class MigrationBuilder
 {
+    /**
+     * The database adapter used to execute SQL queries.
+     *
+     * @var DatabaseAdapterInterface
+     */
     protected static DatabaseAdapterInterface $db;
 
+    /**
+     * Initialize the migration builder with a database adapter.
+     *
+     * @param DatabaseAdapterInterface $adapter The database adapter instance.
+     */
     public static function init(DatabaseAdapterInterface $adapter): void
     {
         self::$db = $adapter;
@@ -18,8 +27,17 @@ class MigrationBuilder
     /**
      * Create a new table using the Blueprint syntax.
      *
-     * @param string   $tableName
-     * @param callable $callback
+     * Example:
+     * ```php
+     * MigrationBuilder::create('users', function (Blueprint $table) {
+     *     $table->uuidPrimary(); // Add a primary key using UUID
+     *     $table->string('name');
+     *     $table->timestamps();
+     * });
+     * ```
+     *
+     * @param string   $tableName The name of the table to create.
+     * @param callable $callback  A callback that receives a `Blueprint` instance to define the table schema.
      */
     public static function create(string $tableName, callable $callback): void
     {
@@ -38,7 +56,12 @@ class MigrationBuilder
     /**
      * Drop a table if it exists.
      *
-     * @param string $tableName
+     * Example:
+     * ```php
+     * MigrationBuilder::dropIfExists('users');
+     * ```
+     *
+     * @param string $tableName The name of the table to drop.
      */
     public static function dropIfExists(string $tableName): void
     {
@@ -47,10 +70,17 @@ class MigrationBuilder
     }
 
     /**
-     * Add a column to an existing table.
+     * Modify an existing table by adding columns.
      *
-     * @param string   $tableName
-     * @param callable $callback
+     * Example:
+     * ```php
+     * MigrationBuilder::table('users', function (Blueprint $table) {
+     *     $table->string('address')->nullable();
+     * });
+     * ```
+     *
+     * @param string   $tableName The name of the table to modify.
+     * @param callable $callback  A callback that receives a `Blueprint` instance to define the new columns.
      */
     public static function table(string $tableName, callable $callback): void
     {
