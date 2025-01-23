@@ -20,6 +20,12 @@ class Blueprint implements BlueprintInterface
         return $this;
     }
 
+    public function softDeletes(): self
+    {
+        $this->columns[] = "`deleted_at` TIMESTAMP NULL DEFAULT NULL";
+        return $this;
+    }
+
     public function timestamps(): self
     {
         $this->columns[] = "`created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP";
@@ -62,6 +68,97 @@ class Blueprint implements BlueprintInterface
     {
         $allowedList = "'" . implode("','", $allowed) . "'";
         $this->columns[] = "`{$name}` ENUM({$allowedList})";
+        return $this;
+    }
+
+    public function integer(string $name, bool $unsigned = false): self
+    {
+        $unsignedSql = $unsigned ? " UNSIGNED" : "";
+        $this->columns[] = "`{$name}` INT{$unsignedSql}";
+        return $this;
+    }
+
+    public function bigInteger(string $name, bool $unsigned = false): self
+    {
+        $unsignedSql = $unsigned ? " UNSIGNED" : "";
+        $this->columns[] = "`{$name}` BIGINT{$unsignedSql}";
+        return $this;
+    }
+
+    public function boolean(string $name): self
+    {
+        $this->columns[] = "`{$name}` TINYINT(1)";
+        return $this;
+    }
+
+    public function decimal(string $name, int $precision, int $scale): self
+    {
+        $this->columns[] = "`{$name}` DECIMAL({$precision}, {$scale})";
+        return $this;
+    }
+
+    public function float(
+        string $name,
+        int $precision = null,
+        int $scale = null
+    ): self {
+        $precisionSql = $precision && $scale ? "({$precision}, {$scale})" : "";
+        $this->columns[] = "`{$name}` FLOAT{$precisionSql}";
+        return $this;
+    }
+
+    public function date(string $name): self
+    {
+        $this->columns[] = "`{$name}` DATE";
+        return $this;
+    }
+
+    public function dateTime(string $name): self
+    {
+        $this->columns[] = "`{$name}` DATETIME";
+        return $this;
+    }
+
+    public function text(string $name): self
+    {
+        $this->columns[] = "`{$name}` TEXT";
+        return $this;
+    }
+
+    public function longText(string $name): self
+    {
+        $this->columns[] = "`{$name}` LONGTEXT";
+        return $this;
+    }
+
+    public function time(string $name): self
+    {
+        $this->columns[] = "`{$name}` TIME";
+        return $this;
+    }
+
+    public function timestamp(string $name): self
+    {
+        $this->columns[] = "`{$name}` TIMESTAMP";
+        return $this;
+    }
+
+    public function binary(string $name): self
+    {
+        $this->columns[] = "`{$name}` BLOB";
+        return $this;
+    }
+
+    public function nullable(string $name, string $type): self
+    {
+        $this->columns[] = "`{$name}` {$type} NULL";
+        return $this;
+    }
+
+    public function default(string $name, string $type, mixed $default): self
+    {
+        $defaultValue = is_string($default) ? "'{$default}'" : $default;
+        $this->columns[] = "`{$name}` {$type} DEFAULT {$defaultValue}";
         return $this;
     }
 
