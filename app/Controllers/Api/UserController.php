@@ -17,7 +17,7 @@ class UserController extends BaseApiController
         return $this->success($users, "User list retrieved");
     }
 
-    public function store(Request $request, User $user): array
+    public function store(Request $request): array
     {
         $data = $this->handleValidation(function () use ($request) {
             return $request->validate([
@@ -25,6 +25,7 @@ class UserController extends BaseApiController
             ]);
         });
 
+        $user = new User();
         $newUser = $user->save($data);
 
         return $this->success($newUser, "User created successfully");

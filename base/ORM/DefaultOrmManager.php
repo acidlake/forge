@@ -55,10 +55,6 @@ class DefaultOrmManager implements OrmManagerInterface
 
     public function insert(array $data): object
     {
-        if (!isset($data["id"])) {
-            $data["id"] = $this->generateUuid();
-        }
-
         $keys = array_keys($data);
         $placeholders = array_map(fn($key) => ":$key", $keys);
 
@@ -70,6 +66,7 @@ class DefaultOrmManager implements OrmManagerInterface
             ")";
         $this->db->execute($query, $data);
 
+        // Return the inserted data
         return (object) $data;
     }
 

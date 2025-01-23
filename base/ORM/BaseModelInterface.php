@@ -2,8 +2,6 @@
 
 namespace Base\ORM;
 
-use Base\ORM\OrmManagerInterface;
-
 interface BaseModelInterface
 {
     public function setTable(string $table): self;

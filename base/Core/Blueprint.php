@@ -34,6 +34,18 @@ class Blueprint implements BlueprintInterface
         return $this;
     }
 
+    public function uuidPrimary(string $name = "id"): self
+    {
+        $this->columns[] = "`{$name}` CHAR(36) PRIMARY KEY";
+        return $this;
+    }
+
+    public function autoIncrement(string $field): self
+    {
+        $this->columns[] = "`{$field}` INT AUTO_INCREMENT PRIMARY KEY";
+        return $this;
+    }
+
     public function unique(string $field): self
     {
         $this->columns[] = "UNIQUE KEY `unique_{$field}` (`{$field}`)";

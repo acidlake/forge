@@ -1,6 +1,7 @@
 <?php
 namespace Base\ORM;
 
+use Base\Core\ContainerAwareTrait;
 use Base\Core\ContainerHelper;
 use Base\ORM\BaseModelInterface;
 use Base\ORM\OrmManagerInterface;
@@ -8,18 +9,35 @@ use Base\Tools\UuidManager;
 
 abstract class BaseModel implements BaseModelInterface
 {
+    use ContainerAwareTrait;
+
     protected string $table;
-    protected bool $uuid = false;
+    protected bool $uuid = false; // Default UUID setting from the model
     protected string $keyStrategy = "uuidv4";
     protected array $fillable = [];
+    private ?bool $runtimeUuid = null; // Override flag for UUID
 
-    public function __construct(
-        protected OrmManagerInterface $orm,
-        protected UuidManager $uuidManager
-    ) {
+    protected OrmManagerInterface $orm;
+    protected UuidManager $uuidManager;
+
+    public function __construct()
+    {
+        $container = $this->getContainer();
+        $this->orm = $container->resolve(OrmManagerInterface::class);
+        $this->uuidManager = $container->resolve(UuidManager::class);
+
         if (isset($this->table)) {
             $this->orm->setTable($this->table);
         }
+    }
+    /**
+     * Get the container instance.
+     *
+     * @return \Base\Core\Container
+     */
+    protected function getContainer(): \Base\Core\Container
+    {
+        return ContainerHelper::getContainer();
     }
 
     /**
@@ -135,16 +153,21 @@ abstract class BaseModel implements BaseModelInterface
     {
         $data = $this->sanitizeInput($data);
 
-        if ($this->uuid && !isset($data["id"])) {
+        // Handle UUID generation if enabled and no ID is provided
+        if ($this->isUuidEnabled() && !isset($data["id"])) {
             $data["id"] = $this->uuidManager->generate($this->keyStrategy);
         }
 
         if (isset($data["id"])) {
-            return $this->orm->update($data["id"], $data)
-                ? (object) $data
-                : null;
+            $existingRecord = $this->orm->find($data["id"]);
+            if ($existingRecord) {
+                return $this->orm->update($data["id"], $data)
+                    ? (object) $data
+                    : null;
+            }
         }
 
+        // Pass the processed data to the ORM for insertion
         return $this->orm->insert($data);
     }
 
@@ -153,10 +176,26 @@ abstract class BaseModel implements BaseModelInterface
         return $this->orm->delete($id);
     }
 
+    /**
+     * Enable or disable UUID at runtime.
+     *
+     * @param bool $enable
+     * @return $this
+     */
     public function enableUuid(bool $enable): self
     {
-        $this->uuid = $enable;
+        $this->runtimeUuid = $enable;
         return $this;
+    }
+
+    /**
+     * Determine if UUIDs are enabled for the model.
+     *
+     * @return bool
+     */
+    protected function isUuidEnabled(): bool
+    {
+        return $this->runtimeUuid !== null ? $this->runtimeUuid : $this->uuid;
     }
 
     public function rawQuery(string $query, array $bindings = []): mixed

@@ -11,11 +11,8 @@ class CreateUsersTable implements MigrationInterface
     public function up(): void
     {
         MigrationBuilder::create("users", function (Blueprint $table) {
-            $table->uuid("id")->primary();
+            $table->autoIncrement("id");
             $table->string("name", 255);
-            $table->string("email", 255)->unique();
-            $table->enum("role", ["admin", "user", "guest"]);
-            $table->timestamps();
         });
     }
 
