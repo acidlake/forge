@@ -2,113 +2,121 @@
 
 namespace Base\Core;
 
-use Base\Interfaces\MigrationInterface;
-use Base\Models\BaseModel;
-use Exception;
+use Base\Database\DatabaseAdapterInterface;
 
 class MigrationManager
 {
-    protected BaseModel $migrationsModel;
+    protected DatabaseAdapterInterface $db;
 
-    public function __construct(BaseModel $model)
+    public function __construct(DatabaseAdapterInterface $db)
     {
-        $this->migrationsModel = $model;
-        $this->ensureMigrationsTable();
+        $this->db = $db;
     }
 
-    /**
-     * Apply all pending migrations.
-     */
-    public function migrate(array $migrations): void
+    public function run(): void
     {
+        $this->ensureMigrationTableExists();
+
+        $migrations = $this->getPendingMigrations();
         foreach ($migrations as $migration) {
-            $migrationName = get_class($migration);
-
-            if ($this->isMigrationApplied($migrationName)) {
-                echo "Migration {$migrationName} already applied.\n";
-                continue;
-            }
-
-            try {
-                $migration->up();
-                $this->markAsApplied($migrationName);
-                echo "Migration {$migrationName} applied successfully.\n";
-            } catch (Exception $e) {
-                echo "Failed to apply {$migrationName}: {$e->getMessage()}\n";
-            }
+            echo "Running migration: {$migration["name"]}...\n";
+            $instance = new ($migration["class"])();
+            $instance->up();
+            $this->markMigrationAsRun($migration["name"]);
         }
     }
 
-    /**
-     * Rollback the last applied migration.
-     */
-    public function rollback(array $migrations): void
+    public function rollback(): void
     {
-        $lastMigration = $this->getLastAppliedMigration();
+        $this->ensureMigrationTableExists();
 
-        if (!$lastMigration) {
-            echo "No migrations to rollback.\n";
-            return;
-        }
-
+        $migrations = $this->getLastBatchMigrations();
         foreach ($migrations as $migration) {
-            if (get_class($migration) === $lastMigration) {
-                try {
-                    $migration->down();
-                    $this->markAsRolledBack($lastMigration);
-                    echo "Migration {$lastMigration} rolled back successfully.\n";
-                    return;
-                } catch (Exception $e) {
-                    echo "Failed to rollback {$lastMigration}: {$e->getMessage()}\n";
-                    return;
-                }
+            echo "Rolling back migration: {$migration["name"]}...\n";
+            $instance = new ($migration["class"])();
+            $instance->down();
+            $this->markMigrationAsRolledBack($migration["name"]);
+        }
+    }
+
+    protected function ensureMigrationTableExists(): void
+    {
+        $this->db->execute("
+            CREATE TABLE IF NOT EXISTS migrations (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                batch INT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ");
+    }
+
+    protected function getPendingMigrations(): array
+    {
+        $migrationsPath = CONFIG_PATH . "/migrations/";
+        $files = glob("{$migrationsPath}/*.php");
+
+        $pending = [];
+        foreach ($files as $file) {
+            $name = basename($file, ".php");
+            $className = $this->getClassNameFromFile($file);
+
+            if (!$this->isMigrationRun($name)) {
+                $pending[] = [
+                    "name" => $name,
+                    "class" => $className,
+                ];
             }
         }
 
-        echo "Migration class {$lastMigration} not found.\n";
+        return $pending;
     }
 
-    /**
-     * Ensure the `migrations` table exists.
-     */
-    protected function ensureMigrationsTable(): void
+    protected function getLastBatchMigrations(): array
     {
-        if (!$this->migrationsModel->tableExists()) {
-            $this->migrationsModel
-                ->schema()
-                ->create("migrations", function ($table) {
-                    $table->uuid("id")->primary();
-                    $table->string("migration");
-                    $table
-                        ->timestamp("applied_at")
-                        ->default("CURRENT_TIMESTAMP");
-                });
-        }
+        // Get the latest batch
+        $batch = $this->db->fetchOne(
+            "SELECT MAX(batch) AS batch FROM migrations"
+        )["batch"];
+        return $this->db->fetchAll("SELECT * FROM migrations WHERE batch = ?", [
+            $batch,
+        ]);
     }
 
-    protected function isMigrationApplied(string $migrationName): bool
+    protected function isMigrationRun(string $name): bool
     {
-        return $this->migrationsModel
-            ->where("migration", $migrationName)
-            ->exists();
+        $result = $this->db->fetchOne(
+            "SELECT COUNT(*) AS count FROM migrations WHERE name = ?",
+            [$name]
+        );
+        return $result["count"] > 0;
     }
 
-    protected function markAsApplied(string $migrationName): void
+    protected function markMigrationAsRun(string $name): void
     {
-        $this->migrationsModel->insert(["migration" => $migrationName]);
+        $batch = $this->getCurrentBatch() + 1;
+        $this->db->execute(
+            "INSERT INTO migrations (name, batch) VALUES (?, ?)",
+            [$name, $batch]
+        );
     }
 
-    protected function markAsRolledBack(string $migrationName): void
+    protected function markMigrationAsRolledBack(string $name): void
     {
-        $this->migrationsModel->where("migration", $migrationName)->delete();
+        $this->db->execute("DELETE FROM migrations WHERE name = ?", [$name]);
     }
 
-    protected function getLastAppliedMigration(): ?string
+    protected function getCurrentBatch(): int
     {
-        $lastMigration = $this->migrationsModel
-            ->orderBy("applied_at", "desc")
-            ->first();
+        $result = $this->db->fetchOne(
+            "SELECT MAX(batch) AS batch FROM migrations"
+        );
+        return $result["batch"] ?? 0;
+    }
 
-        return $lastMigration ? $lastMigration->migration : null;
+    private function getClassNameFromFile(string $filePath): string
+    {
+        $relativePath = str_replace(BASE_PATH . "/", "", $filePath);
+        return str_replace(["/", ".php"], ["\\", ""], $relativePath);
     }
 }

@@ -64,4 +64,16 @@ class Container
 
         return call_user_func($this->bindings[$abstract]);
     }
+
+    /**
+     * Checks if a binding exists for the given abstract type.
+     *
+     * @param string $abstract The abstract type or interface to check.
+     *
+     * @return bool True if the binding exists, false otherwise.
+     */
+    public function has(string $abstract): bool
+    {
+        return isset($this->bindings[$abstract]);
+    }
 }

@@ -24,15 +24,24 @@ require_once __DIR__ . "/base/Core/Autoloader.php";
 
 use Base\Core\Autoloader;
 use Base\Core\CLI;
+use Base\Core\Container;
+use Base\Core\CoreServiceProvider;
 
 // Register the autoloader
 Autoloader::register();
+
+/**
+ * Initialize the dependency injection container and register services.
+ */
+$container = new Container();
+$serviceProvider = new CoreServiceProvider();
+$serviceProvider->register($container);
 
 /**
  * Initialize and execute the CLI handler.
  *
  * The CLI class processes command-line arguments and executes the appropriate command.
  */
-$cli = new CLI();
+$cli = new CLI($container);
 $cli->handle($argv);
 

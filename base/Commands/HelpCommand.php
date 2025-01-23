@@ -1,5 +1,4 @@
 <?php
-
 namespace Base\Commands;
 
 use Base\Interfaces\CommandInterface;
@@ -21,17 +20,14 @@ class HelpCommand implements CommandInterface
 
     public function getDescription(): string
     {
-        return "Displays a list of available commands.";
+        return "Displays the help menu.";
     }
 
     public function execute(array $arguments = []): void
     {
         echo "Available commands:\n";
-
         foreach ($this->cli->getCommands() as $name => $command) {
-            echo "- {$name}: " . $command->getDescription() . "\n";
+            echo "  {$name}: {$command->getDescription()}\n";
         }
-
-        echo "\nUse `php forge <command>` to execute a command.\n";
     }
 }

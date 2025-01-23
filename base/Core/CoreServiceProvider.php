@@ -11,11 +11,13 @@ use Base\Authentication\OTP\Adapters\GoogleAuthenticatorAdapter;
 use Base\Authentication\OTP\OTPManager;
 use Base\Controllers\BaseApiController;
 use Base\Database\BaseSchemaBuilder;
+use Base\Database\MigrationManager;
 use Base\Helpers\EnvHelper;
 use Base\Helpers\EnvValueParser;
 use Base\Helpers\KeyGenerator;
 use Base\Helpers\ModelSerializerHelper;
 use Base\Interfaces\BaseApiControllerInterface;
+use Base\Interfaces\CommandInterface;
 use Base\Interfaces\ConfigHelperInterface;
 use Base\Interfaces\ConfigurationManagerInterface;
 use Base\Interfaces\EnvValueParserInterface;
@@ -65,6 +67,14 @@ use PDO;
 class CoreServiceProvider extends ServiceProvider
 {
     use ContainerAwareTrait;
+
+    private array $commands = [];
+
+    public function has(string $abstract): bool
+    {
+        return isset($this->bindings[$abstract]);
+    }
+
     /**
      * Registers core services into the dependency injection container.
      *
@@ -96,6 +106,17 @@ class CoreServiceProvider extends ServiceProvider
         );
 
         $this->registerModels($container);
+
+        $this->loadCommands(
+            $container,
+            BASE_PATH . "/base/Commands",
+            "Base\\Commands\\"
+        );
+        $this->loadCommands(
+            $container,
+            BASE_PATH . "/app/Commands",
+            "App\\Commands\\"
+        );
 
         // Register the logger
         $container->bind(LoggerInterface::class, function () {
@@ -305,6 +326,57 @@ class CoreServiceProvider extends ServiceProvider
             )
         );
 
+        $container->bind(MigrationManager::class, function ($container) {
+            $databaseAdapter = $container->resolve(
+                ORMDatabaseAdapterInterface::class
+            );
+            return new MigrationManager($databaseAdapter);
+        });
+
+        $container->bind(SeederManager::class, function ($container) {
+            $databaseAdapter = $container->resolve(
+                ORMDatabaseAdapterInterface::class
+            );
+            return new SeederManager($databaseAdapter);
+        });
+
+        $container->bind(CLI::class, function ($container) {
+            return new CLI($container);
+        });
+
+        $container->bind(CLI::class, function ($container) {
+            return new CLI($container);
+        });
+
+        $container->bind("Base\\Commands\\HelpCommand", function ($container) {
+            $cli = $container->resolve(CLI::class);
+            return new \Base\Commands\HelpCommand($cli);
+        });
+
+        $container->bind("Base\\Commands\\ListCommand", function ($container) {
+            $cli = $container->resolve(CLI::class);
+            return new \Base\Commands\ListCommand($cli);
+        });
+
+        $container->bind("Base\\Commands\\SeedCommand", function ($container) {
+            $seederManager = $container->resolve(SeederManager::class);
+            return new \Base\Commands\SeedCommand($seederManager);
+        });
+
+        $container->bind("Base\\Commands\\MigrateCommand", function (
+            $container
+        ) {
+            $migrationManager = $container->resolve(MigrationManager::class);
+            return new \Base\Commands\MigrateCommand($migrationManager);
+        });
+
+        $container->bind("Base\\Commands\\MigrateRollbackCommand", function (
+            $container
+        ) {
+            $migrationManager = $container->resolve(MigrationManager::class);
+            return new \Base\Commands\MigrateRollbackCommand($migrationManager);
+        });
+
         // Uuid Strategies
         $container->bind(\Base\Tools\UuidManager::class, function () {
             $manager = new \Base\Tools\UuidManager();
@@ -361,6 +433,57 @@ class CoreServiceProvider extends ServiceProvider
 
                     return new $className($orm, $uuidManager);
                 });
+            }
+        }
+    }
+
+    /**
+     * Load and register commands from the specified directory.
+     *
+     * @param Container $container
+     * @param string $directory
+     * @param string $namespace
+     * @return void
+     */
+    private function loadCommands(
+        Container $container,
+        string $directory,
+        string $namespace
+    ): void {
+        if (!is_dir($directory)) {
+            return;
+        }
+
+        foreach (glob("{$directory}/*.php") as $file) {
+            $className = "{$namespace}" . basename($file, ".php");
+
+            if (
+                class_exists($className) &&
+                is_subclass_of($className, CommandInterface::class)
+            ) {
+                $reflection = new \ReflectionClass($className);
+                $constructor = $reflection->getConstructor();
+
+                if (
+                    !$constructor ||
+                    $constructor->getNumberOfParameters() === 0
+                ) {
+                    // Instantiate commands without dependencies directly
+                    $this->commands[$className] = new $className();
+                } else {
+                    // Bind commands with dependencies to the container
+                    $container->bind($className, function ($container) use (
+                        $reflection
+                    ) {
+                        $dependencies = array_map(
+                            fn($param) => $container->resolve(
+                                $param->getType()->getName()
+                            ),
+                            $reflection->getConstructor()->getParameters()
+                        );
+                        return $reflection->newInstanceArgs($dependencies);
+                    });
+                }
             }
         }
     }

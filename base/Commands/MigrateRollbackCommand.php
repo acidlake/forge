@@ -5,7 +5,7 @@ namespace Base\Commands;
 use Base\Core\MigrationManager;
 use Base\Interfaces\CommandInterface;
 
-class MigrateCommand implements CommandInterface
+class MigrateRollbackCommand implements CommandInterface
 {
     protected MigrationManager $migrationManager;
 
@@ -16,16 +16,16 @@ class MigrateCommand implements CommandInterface
 
     public function getName(): string
     {
-        return "migrate";
+        return "migrate:rollback";
     }
 
     public function getDescription(): string
     {
-        return "Run all pending migrations.";
+        return "Rollback the last batch of migrations.";
     }
 
     public function execute(array $arguments = []): void
     {
-        $this->migrationManager->run();
+        $this->migrationManager->rollback();
     }
 }

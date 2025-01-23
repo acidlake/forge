@@ -21,6 +21,7 @@ interface CommandInterface
      * @return string The name of the command.
      */
     public function getName(): string;
+    public function getDescription(): string;
 
     /**
      * Execute the command with the given arguments.

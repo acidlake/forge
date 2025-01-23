@@ -7,6 +7,7 @@ use Base\Interfaces\CommandInterface;
 
 class ClearCommand implements CommandInterface
 {
+    public function __construct() {}
     public function getName(): string
     {
         return "clear";

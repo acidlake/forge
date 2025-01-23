@@ -1,13 +1,13 @@
 <?php
-namespace Base\Interfaces;
 
-/**
- * Interface for database seeders.
- */
+namespace Base\Interfaces;
+use Base\Database\DatabaseAdapterInterface;
+
 interface SeederInterface
 {
-    /**
-     * Seed the database with initial data.
-     */
+    public function __construct(DatabaseAdapterInterface $db);
+
     public function run(): void;
+
+    public function rollback(): void;
 }
