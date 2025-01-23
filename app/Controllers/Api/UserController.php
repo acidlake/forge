@@ -4,19 +4,40 @@ namespace App\Controllers\Api;
 use App\Models\User;
 use Base\Controllers\BaseApiController;
 use Base\Core\ContainerAwareTrait;
+use Base\Helpers\HtmlPaginationHelper;
 use Base\Interfaces\RequestInterface as Request;
+use Base\Interfaces\ViewInterface;
+use Base\Router\Http\Response;
 
 class UserController extends BaseApiController
 {
     use ContainerAwareTrait;
 
-    public function index(): array
+    public function index(Request $request): array|string
     {
-        $page = 1;
-        $perPage = 10;
+        /**
+         * Resolve the ViewInterface instance from the DI container.
+         *
+         * @var ViewInterface $view
+         */
+        $view = $this->resolve(ViewInterface::class);
+
+        $page = $request->query("page", 1);
+        $perPage = $request->query("per_page");
         $users = User::paginate($perPage, $page);
 
-        return $this->paginatedSuccess($users, "User list retrieved");
+        $paginationHelper = (new HtmlPaginationHelper())
+            ->setCurrentPage($page)
+            ->setTotalPages($users["pagination"]["totalPages"]);
+
+        $paginationHtml = $paginationHelper->render();
+
+        $data = [
+            "users" => $users["data"],
+            "pagination" => $paginationHtml,
+        ];
+
+        return $view->render("users.index", $data);
     }
 
     public function store(Request $request): array

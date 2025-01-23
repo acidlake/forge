@@ -32,6 +32,10 @@ use Base\Core\CoreServiceProvider;
 use Base\Core\RouteLoader;
 use Base\Interfaces\RouterInterface;
 use Base\Tools\InternalRoutes;
+use Base\Exceptions\ExceptionHandler;
+
+// Set a global exception handler
+set_exception_handler([ExceptionHandler::class, "handle"]);
 
 // Get the Dependency Injection (DI) container
 $container = ContainerHelper::getContainer();

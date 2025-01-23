@@ -53,6 +53,14 @@ class Request implements RequestInterface
     }
 
     /**
+     * Get a specific query parameter for pagination.
+     */
+    public function page(string $key = "page", int $default = 1): int
+    {
+        return (int) ($this->query[$key] ?? $default);
+    }
+
+    /**
      * Get the entire body or a specific body parameter.
      */
     public function body(?string $key = null, $default = null): mixed
@@ -64,11 +72,11 @@ class Request implements RequestInterface
     }
 
     /**
-     * Get a specific body parameter.
+     * Get a specific input parameter (query + body).
      */
     public function input(string $key, $default = null): mixed
     {
-        return $this->body[$key] ?? $default;
+        return $this->body[$key] ?? ($this->query[$key] ?? $default);
     }
 
     /**
@@ -76,7 +84,7 @@ class Request implements RequestInterface
      */
     public function validate(array $rules): array
     {
-        $validator = new Validator($this->body);
+        $validator = new Validator(array_merge($this->query, $this->body));
         $validated = $validator->validate($rules);
 
         if ($validated->fails()) {

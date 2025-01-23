@@ -97,7 +97,7 @@ class HomeController
         echo "<br />";
         echo "<br />";
         echo "send email";
-        $this->sendEmail();
+        //$this->sendEmail();
 
         /**
          * @var StorageManagerInterface $storage

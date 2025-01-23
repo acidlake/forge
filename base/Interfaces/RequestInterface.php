@@ -54,4 +54,6 @@ interface RequestInterface
      * @return array The validated data. Throws an exception if validation fails.
      */
     public function validate(array $rules): array;
+
+    public function page(string $key = "page", int $default = 1): int;
 }
