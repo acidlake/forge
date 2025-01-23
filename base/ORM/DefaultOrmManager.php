@@ -3,7 +3,6 @@
 namespace Base\ORM;
 
 use Base\Database\DatabaseAdapterInterface;
-use RuntimeException;
 
 class DefaultOrmManager implements OrmManagerInterface
 {
@@ -101,20 +100,39 @@ class DefaultOrmManager implements OrmManagerInterface
 
     private function buildWhereClause(): string
     {
-        if (empty($this->conditions)) {
-            return "";
-        }
-
         $clauses = [];
+
         foreach ($this->conditions as $key => $value) {
-            $clauses[] = "{$key} = :{$key}";
+            if (is_array($value)) {
+                [$operator, $val] = $value;
+                $clauses[] = "{$key} {$operator} :{$key}";
+            } else {
+                $clauses[] = "{$key} = :{$key}";
+            }
         }
 
-        return "WHERE " . implode(" AND ", $clauses);
+        if (!isset($this->conditions["deleted_at"])) {
+            $clauses[] = "deleted_at IS NULL";
+        }
+
+        return $clauses ? "WHERE " . implode(" AND ", $clauses) : "";
     }
 
     private function generateUuid(): string
     {
         return bin2hex(random_bytes(16));
+    }
+
+    public function enableIncludeTrashed(): void
+    {
+        $this->conditions = array_filter(
+            $this->conditions,
+            fn($key) => $key !== "deleted_at"
+        );
+    }
+
+    public function enableOnlyTrashed(): void
+    {
+        $this->conditions["deleted_at"] = ["!=", null];
     }
 }

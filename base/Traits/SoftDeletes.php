@@ -1,75 +1,49 @@
 <?php
 namespace Base\Traits;
 
-use Base\ORM\QueryBuilder;
+use DateTime;
 
+/**
+ * @method static static resolve() Resolve the instance of the model
+ */
 trait SoftDeletes
 {
-    /**
-     * Soft delete the model by setting the deleted_at timestamp.
-     *
-     * @return bool
-     */
-    public function delete(): bool
+    protected bool $usesSoftDeletes = true;
+
+    public function delete(string|int $id): bool
     {
-        if (property_exists($this, "adapter") && $this->adapter) {
-            $timestamp = date("Y-m-d H:i:s");
-            return $this->adapter->save(
-                $this->table,
-                ["deleted_at" => $timestamp, $this->key => $this->{$this->key}],
-                $this->key
-            );
+        if ($this->usesSoftDeletes) {
+            $deletedAt = (new DateTime())->format("Y-m-d H:i:s");
+            return $this->orm->update($id, ["deleted_at" => $deletedAt]);
         }
-        return false;
+        return $this->orm->delete($id);
     }
 
-    /**
-     * Restore a soft-deleted model.
-     *
-     * @return bool
-     */
-    public function restore(): bool
+    public function forceDelete(string|int $id): bool
     {
-        if (property_exists($this, "adapter") && $this->adapter) {
-            return $this->adapter->save(
-                $this->table,
-                ["deleted_at" => null, $this->key => $this->{$this->key}],
-                $this->key
-            );
+        return $this->orm->delete($id);
+    }
+
+    public function restore(string|int $id): bool
+    {
+        if (!$this->usesSoftDeletes) {
+            return false;
         }
-        return false;
+
+        return $this->orm->update($id, ["deleted_at" => null]);
     }
 
-    /**
-     * Check if the model is soft deleted.
-     *
-     * @return bool
-     */
-    public function trashed(): bool
+    public static function withTrashed(): static
     {
-        return $this->deleted_at !== null;
+        $instance = static::resolve();
+        $instance->orm->enableIncludeTrashed();
+        return $instance;
     }
 
-    /**
-     * Modify queries to exclude soft-deleted records.
-     *
-     * @param QueryBuilder $query
-     * @return QueryBuilder
-     */
-    public static function withTrashed(QueryBuilder $query): QueryBuilder
+    public static function onlyTrashed(): static
     {
-        return $query; // No modifications, include all records
-    }
-
-    public static function withoutTrashed(QueryBuilder $query): QueryBuilder
-    {
-        $instance = new static();
-        return $query->where(["deleted_at" => null]);
-    }
-
-    public static function onlyTrashed(QueryBuilder $query): QueryBuilder
-    {
-        $instance = new static();
-        return $query->where(["deleted_at IS NOT" => null]);
+        $instance = static::resolve();
+        $instance->orm->enableOnlyTrashed();
+        return $instance;
     }
 }

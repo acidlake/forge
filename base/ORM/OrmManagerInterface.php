@@ -23,4 +23,6 @@ interface OrmManagerInterface
     public function rawQuery(string $query, array $bindings = []): mixed;
 
     public function enableNoSQLMode(bool $enable): self;
+    public function enableIncludeTrashed(): void;
+    public function enableOnlyTrashed(): void;
 }
