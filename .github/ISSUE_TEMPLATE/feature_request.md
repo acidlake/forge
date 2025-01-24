@@ -1,13 +1,20 @@
-# Feature Request Title
-Provide a concise and descriptive title for your feature request.
+---
+name: Feature request
+about: Suggest an idea for this project
+title: ''
+labels: ''
+assignees: ''
 
-## Description
-- Describe the feature you are requesting.
-- Explain why this feature would be beneficial.
+---
 
-## Possible Implementation
-- Share any ideas on how this feature could be implemented.
-- Include code snippets, design mockups, or references if applicable.
+**Is your feature request related to a problem? Please describe.**
+A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
 
-## Additional Notes
-- Include any additional context, screenshots, or related references.
+**Describe the solution you'd like**
+A clear and concise description of what you want to happen.
+
+**Describe alternatives you've considered**
+A clear and concise description of any alternative solutions or features you've considered.
+
+**Additional context**
+Add any other context or screenshots about the feature request here.
