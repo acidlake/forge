@@ -109,7 +109,7 @@ class Blueprint implements BlueprintInterface
     public function unique(string $field): self
     {
         $this->columns[] = "UNIQUE KEY `unique_{$field}` (`{$field}`)";
-        $this->lastColumn = $name;
+        $this->lastColumn = $field;
         return $this;
     }
 
