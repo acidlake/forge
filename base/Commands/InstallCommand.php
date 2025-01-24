@@ -38,6 +38,24 @@ class InstallCommand implements CommandInterface
             }
         }
 
+        // Copy .env-example to .env if it exists
+        $envExample = BASE_PATH . "/.env-example";
+        $envFile = BASE_PATH . "/.env";
+
+        if (file_exists($envExample)) {
+            if (!file_exists($envFile)) {
+                if (copy($envExample, $envFile)) {
+                    echo ".env-example copied to .env successfully.\n";
+                } else {
+                    echo "Failed to copy .env-example to .env.\n";
+                }
+            } else {
+                echo ".env file already exists. Skipping copy.\n";
+            }
+        } else {
+            echo "No .env-example file found. Skipping .env setup.\n";
+        }
+
         echo "Installation complete.\n";
     }
 }

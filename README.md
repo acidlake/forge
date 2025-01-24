@@ -4,7 +4,7 @@ A lightweight, flexible, and modular PHP framework designed for long-term mainta
 
 ## Description
 
-This framework provides a robust foundation for building modern PHP applications by combining:
+Forge Framework provides a robust foundation for building modern PHP applications by combining:
 - Flexibility to adapt to various project structures.
 - Simplicity in design, ensuring ease of understanding and use.
 - Extensibility to empower developers with tools and features that align with their specific needs.
@@ -18,7 +18,7 @@ Frameworks often:
 - Have tightly coupled components, making it difficult to customize or replace functionality.
 - Require constant updates to remain secure and compatible.
 
-This framework addresses these issues by:
+Forge Framework addresses these issues by:
 - Providing only essential tools and features while remaining easily extensible.
 - Following SOLID principles and separation of concerns, allowing developers to replace or extend components as needed.
 - Ensuring the core remains stable, reliable, and independent of external libraries or frameworks.
@@ -31,20 +31,22 @@ This framework addresses these issues by:
 - **Flexibility**: Supports multiple project structures like default, modular, and DDD.
 
 ### Key Features
-- **Custom Lightweight Router**: A built-in router for handling routes efficiently.
-- **View Engine**: Ships with a simple, extendable view engine that supports IntelliSense.
-- **Seeding and Migrations**: Tools for managing database schema and populating data.
-- **Environment Management**: `EnvHelper` for managing environment variables and paths.
-- **Command-Line Interface (CLI)**: For handling migrations, seeding, and other tasks.
+- **Custom Lightweight Router**: A built-in router for handling routes efficiently with middleware support.
+- **View Engine**: Ships with a simple, extendable view engine that supports IntelliSense and folder-like view paths.
+- **Environment Management**: `EnvHelper` for managing environment variables and resolving paths dynamically.
+- **Command-Line Interface (CLI)**: Handles migrations, seeding, and other essential tasks, with support for custom commands.
 - **Role-Based Authorization**: Built-in support for managing user roles and permissions.
-- **Testability**: Preconfigured testing utilities for unit and integration tests.
+- **Middleware Helpers**: Includes common middleware like rate limiting, circuit breakers, and JSON header setup.
+- **Custom Adapters**: A modular adapter system to extend functionality or integrate third-party tools.
+- **Testability**: Preconfigured utilities for unit and integration tests.
 - **Framework Extensibility**: Replaceable components like the router, logger, and more.
 
 ### Developer Experience
 - **Separation of Concerns**: Clean architecture with clear boundaries between features.
-- **Dependency Injection**: Support for GetIt-style DI to promote decoupled design.
-- **Custom Adapters**: A marketplace-ready adapter system for shared functionality.
+- **Dependency Injection**: Support for decoupled and modular design.
 - **Readable and Maintainable Code**: Adheres to best practices for long-term reliability.
+- **Autoloading**: Support for autoloading dependencies from the `toolbox/` directory.
+- **Installation Script**: Streamlines setup and configuration, including `.env` setup.
 
 ## Pending Features
 
@@ -65,6 +67,8 @@ This framework addresses these issues by:
    ```bash
    php forge install
    ```
+   - This will install dependencies, set permissions, and copy `.env-example` to `.env` if it exists.
+
 3. Configure environment variables in `.env`.
 
 ## Usage
