@@ -37,6 +37,26 @@ class Request implements RequestInterface
     }
 
     /**
+     * Get the HTTP method.
+     *
+     * @return string
+     */
+    public function getMethod(): string
+    {
+        return $this->method;
+    }
+
+    /**
+     * Get the URI.
+     *
+     * @return string
+     */
+    public function getUri(): string
+    {
+        return $this->uri;
+    }
+
+    /**
      * Get a specific header.
      */
     public function header(string $key, $default = null): ?string

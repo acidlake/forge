@@ -56,4 +56,17 @@ interface RequestInterface
     public function validate(array $rules): array;
 
     public function page(string $key = "page", int $default = 1): int;
+    /**
+     * Get the HTTP method.
+     *
+     * @return string
+     */
+    public function getMethod(): string;
+
+    /**
+     * Get the URI.
+     *
+     * @return string
+     */
+    public function getUri(): string;
 }
