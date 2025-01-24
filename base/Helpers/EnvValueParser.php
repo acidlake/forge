@@ -14,7 +14,15 @@ class EnvValueParser implements EnvValueParserInterface
      */
     public static function parseCommaSeparatedString(string $value): array
     {
-        // Split the string by commas and trim spaces from each part
+        if (!is_string($value)) {
+            throw new \InvalidArgumentException(
+                __METHOD__ .
+                    "(): Argument #1 (\$value) must be of type string, " .
+                    gettype($value) .
+                    " given."
+            );
+        }
+
         return array_map("trim", explode(",", $value));
     }
 }

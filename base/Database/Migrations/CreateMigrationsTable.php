@@ -1,27 +1,23 @@
 <?php
 namespace Base\Database\Migrations;
 
+use Base\Core\Blueprint;
 use Base\Database\BaseMigration;
-use Base\Database\BaseSchemaBuilder;
-use Base\Database\SchemaBlueprint as Blueprint;
 
 class CreateMigrationsTable extends BaseMigration
 {
-    public function up()
+    public function up(): void
     {
-        $schema = new BaseSchemaBuilder();
-
-        $schema->create("migrations", function (Blueprint $table) {
-            $table->autoIncrementPrimary("id");
+        $this->schema->create("migrations", function (Blueprint $table) {
+            $table->autoIncrement("id");
             $table->string("migration");
             $table->integer("batch");
             $table->timestamps();
         });
     }
 
-    public function down()
+    public function down(): void
     {
-        $schema = new BaseSchemaBuilder();
-        $schema->drop("users");
+        $this->schema->drop("users");
     }
 }

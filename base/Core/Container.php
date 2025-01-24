@@ -61,7 +61,23 @@ class Container
         if (!isset($this->bindings[$abstract])) {
             throw new Exception("No binding found for {$abstract}");
         }
+        return call_user_func($this->bindings[$abstract], $this);
+    }
 
-        return call_user_func($this->bindings[$abstract]);
+    /**
+     * Checks if a binding exists for the given abstract type.
+     *
+     * @param string $abstract The abstract type or interface to check.
+     *
+     * @return bool True if the binding exists, false otherwise.
+     */
+    public function has(string $abstract): bool
+    {
+        return isset($this->bindings[$abstract]);
+    }
+
+    public function getAllBindings(): array
+    {
+        return $this->bindings;
     }
 }

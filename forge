@@ -19,20 +19,39 @@
  */
 
 define("BASE_PATH", __DIR__); // Define the base path for the framework.
+define("ENV_PATH", BASE_PATH . "/.env"); // Path to the .env file
+define("CORE_CONFIG_PATH", BASE_PATH . "/config/"); // Define the path for framework configuration files.
+define("APP_CONFIG_PATH", BASE_PATH . "/app/config/"); // Define the path for application configuration files.
 
+// Load the .env file
+require_once __DIR__ . "/base/Tools/EnvLoader.php";
+Base\Tools\EnvLoader::load(ENV_PATH);
+
+// Autoload framework and application classes
 require_once __DIR__ . "/base/Core/Autoloader.php";
+Base\Core\Autoloader::register();
 
-use Base\Core\Autoloader;
+use Base\Core\Container;
+use Base\Core\ContainerHelper;
+use Base\Core\CoreServiceProvider;
 use Base\Core\CLI;
 
-// Register the autoloader
-Autoloader::register();
+try {
+    // Create and set the container
+    $container = new Container();
+    ContainerHelper::setContainer($container);
 
-/**
- * Initialize and execute the CLI handler.
- *
- * The CLI class processes command-line arguments and executes the appropriate command.
- */
-$cli = new CLI();
-$cli->handle($argv);
+    // Register core services
+    $coreServiceProvider = new CoreServiceProvider();
+    $coreServiceProvider->register($container);
+
+    // Resolve and handle CLI commands
+    $cli = $container->resolve(CLI::class);
+    $cli->handle($argv);
+} catch (Throwable $e) {
+    // Handle and log errors
+    echo "An error occurred: " . $e->getMessage() . "\n";
+    echo $e->getTraceAsString();
+    exit(1);
+}
 

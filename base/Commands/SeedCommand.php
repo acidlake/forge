@@ -1,17 +1,14 @@
 <?php
+
 namespace Base\Commands;
 
-use Base\Database\BaseSeeder;
+use Base\Core\SeederManager;
 use Base\Interfaces\CommandInterface;
+use Base\Tools\StructurePathResolver;
 
 class SeedCommand implements CommandInterface
 {
-    private string $seederPath;
-
-    public function __construct()
-    {
-        $this->seederPath = BASE_PATH . "/app/Database/Seeders";
-    }
+    public function __construct(protected SeederManager $seederManager) {}
 
     public function getName(): string
     {
@@ -20,25 +17,20 @@ class SeedCommand implements CommandInterface
 
     public function getDescription(): string
     {
-        return "Seed the database with initial data.";
+        return "Run database seeders.";
     }
 
     public function execute(array $arguments = []): void
     {
-        $seederClass = $arguments[0] ?? "App\\Seeders\\DatabaseSeeder";
+        $seederPath = StructurePathResolver::resolvePath("seeders");
+        $defaultSeeder =
+            StructurePathResolver::resolveNamespace($seederPath) .
+            "\\DatabaseSeeder";
 
-        if (!class_exists($seederClass)) {
-            echo "Seeder class {$seederClass} not found.\n";
-            return;
-        }
+        $seederName = $arguments[0] ?? $defaultSeeder;
 
-        $seeder = new $seederClass();
-        if ($seeder instanceof BaseSeeder) {
-            echo "Running seeder: {$seederClass}\n";
-            $seeder->run();
-            echo "Seeder completed.\n";
-        } else {
-            echo "Class {$seederClass} is not a valid seeder.\n";
-        }
+        echo "Running seeder: {$seederName}\n";
+
+        $this->seederManager->run($seederName);
     }
 }

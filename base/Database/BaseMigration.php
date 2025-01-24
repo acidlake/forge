@@ -1,25 +1,26 @@
 <?php
 namespace Base\Database;
 
-use Base\Interfaces\ORMDatabaseAdapterInterface;
+use Base\Database\DatabaseAdapterInterface;
+use Base\Interfaces\MigrationInterface;
 
-abstract class BaseMigration
+abstract class BaseMigration implements MigrationInterface
 {
-    protected ORMDatabaseAdapterInterface $adapter;
+    protected DatabaseAdapterInterface $adapter;
     protected BaseSchemaBuilder $schema;
 
     public function __construct(
-        ORMDatabaseAdapterInterface $adapter,
+        DatabaseAdapterInterface $adapter,
         BaseSchemaBuilder $schema
     ) {
         $this->adapter = $adapter;
         $this->schema = $schema;
     }
 
-    abstract public function up();
-    abstract public function down();
+    abstract public function up(): void;
+    abstract public function down(): void;
 
-    protected function raw(string $sql)
+    protected function raw(string $sql): void
     {
         $this->adapter->query($sql);
     }

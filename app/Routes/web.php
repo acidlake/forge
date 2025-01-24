@@ -2,6 +2,7 @@
 
 namespace App\Routes;
 
+use App\Controllers\Api\UserController;
 use App\Controllers\HomeController;
 use Base\Core\ContainerHelper;
 use Base\Interfaces\RouterInterface;
@@ -49,6 +50,7 @@ return function (RouterInterface $router) {
      * Calls the `index` method of `HomeController`.
      */
     $router->get("/", [HomeController::class, "index"]);
+    $router->get("/users", [UserController::class, "index"]);
 
     /**
      * GET /user/{id}

@@ -1,195 +1,335 @@
 <?php
+
 namespace Base\ORM;
 
 use Base\Core\ContainerAwareTrait;
 use Base\Core\ContainerHelper;
-use Base\Interfaces\KeyGeneratorInterface;
-use Base\Interfaces\ORMDatabaseAdapterInterface;
-use Base\Traits\SoftDeletes;
-use Base\Traits\Timestamps;
+use Base\ORM\BaseModelInterface;
+use Base\ORM\OrmManagerInterface;
+use Base\Tools\UuidManager;
 
-abstract class BaseModel
+/**
+ * BaseModel
+ *
+ * Abstract class providing ORM features for models.
+ * Models extending this class gain functionality for interacting with the database.
+ */
+abstract class BaseModel implements BaseModelInterface
 {
-    use SoftDeletes, Timestamps, ContainerAwareTrait;
+    use ContainerAwareTrait;
 
-    protected string $table = ""; // Database table
-    protected string $key = "id"; // Primary key column
-    protected array $fillable = []; // Columns allowed for mass assignment
-    protected array $schema = [];
-    protected string $keyStrategy = "id"; // Default strategy
-    protected int $keyLength = 36;
+    /**
+     * @var string $table The table name associated with the model.
+     */
+    protected string $table;
 
-    private ORMDatabaseAdapterInterface $adapter;
-    private KeyGeneratorInterface $keyGenerator;
-    private array $attributes = [];
+    /**
+     * @var bool $uuid Whether UUIDs are enabled for this model.
+     */
+    protected bool $uuid = false;
 
+    /**
+     * @var string $keyStrategy The strategy for generating UUIDs.
+     */
+    protected string $keyStrategy = "uuidv4";
+
+    /**
+     * @var array $fillable Fields that can be mass assigned.
+     */
+    protected array $fillable = [];
+
+    /**
+     * @var ?bool $runtimeUuid Runtime override for enabling/disabling UUIDs.
+     */
+    private ?bool $runtimeUuid = null;
+
+    protected OrmManagerInterface $orm;
+    protected UuidManager $uuidManager;
+
+    /**
+     * Constructor initializes dependencies and sets the table name in the ORM.
+     */
     public function __construct()
     {
-        $this->adapter = $this->resolve(ORMDatabaseAdapterInterface::class);
-        $this->keyGenerator = $this->resolve(KeyGeneratorInterface::class);
+        $container = $this->getContainer();
+        $this->orm = $container->resolve(OrmManagerInterface::class);
+        $this->uuidManager = $container->resolve(UuidManager::class);
 
-        foreach ($this->fillable as $property) {
-            $this->attributes[$property] = null;
+        if (isset($this->table)) {
+            $this->orm->setTable($this->table);
+        }
+
+        $this->orm->setModel($this);
+    }
+
+    /**
+     * Get the container instance.
+     *
+     * @return \Base\Core\Container
+     */
+    protected function getContainer(): \Base\Core\Container
+    {
+        return ContainerHelper::getContainer();
+    }
+
+    /**
+     * Resolve an instance of the model using the DI container.
+     *
+     * @return static
+     */
+    public static function resolve(): static
+    {
+        $container = ContainerHelper::getContainer();
+        return $container->resolve(static::class);
+    }
+
+    /**
+     * Retrieve all records from the database.
+     *
+     * @return array
+     */
+    public static function all(): array
+    {
+        return static::resolve()->_all();
+    }
+
+    /**
+     * Retrieve all records (non-static implementation).
+     *
+     * @return array
+     */
+    protected function _all(): array
+    {
+        return $this->orm->all();
+    }
+
+    public static function paginate(
+        int $perPage = 10,
+        int $currentPage = 1
+    ): array {
+        return static::resolve()->_paginate($perPage, $currentPage);
+    }
+
+    protected function _paginate(int $perPage, int $currentPage): array
+    {
+        return $this->orm->paginate($perPage, $currentPage);
+    }
+
+    /**
+     * Find a record by its ID.
+     *
+     * @param string|int $id
+     * @return object|null
+     */
+    public static function find(string|int $id): ?object
+    {
+        return static::resolve()->_find($id);
+    }
+
+    /**
+     * Find a record by its ID (non-static implementation).
+     *
+     * @param string|int $id
+     * @return object|null
+     */
+    protected function _find(string|int $id): ?object
+    {
+        return $this->orm->find($id);
+    }
+
+    /**
+     * Find a record by a specific field.
+     *
+     * @param string $field
+     * @param mixed $value
+     * @return object|null
+     */
+    public static function findBy(string $field, mixed $value): ?object
+    {
+        return static::resolve()->_findBy($field, $value);
+    }
+
+    /**
+     * Find a record by a specific field (non-static implementation).
+     *
+     * @param string $field
+     * @param mixed $value
+     * @return object|null
+     */
+    protected function _findBy(string $field, mixed $value): ?object
+    {
+        return $this->orm->findBy($field, $value);
+    }
+
+    /**
+     * Apply conditions to a query.
+     *
+     * @param array $conditions
+     * @return static
+     */
+    public static function where(array $conditions): static
+    {
+        return static::resolve()->_where($conditions);
+    }
+
+    /**
+     * Apply conditions to a query (non-static implementation).
+     *
+     * @param array $conditions
+     * @return static
+     */
+    protected function _where(array $conditions): static
+    {
+        $this->orm->where($conditions);
+        return $this;
+    }
+    /**
+     * Generate a UUID using the configured strategy.
+     *
+     * @param string|null $strategy The strategy to use for UUID generation (optional).
+     * @return string The generated UUID.
+     */
+    public static function generateUUID(string $strategy = null): string
+    {
+        return static::resolve()->uuidManager->generate($strategy);
+    }
+
+    public static function createMany(array $records): void
+    {
+        $instance = static::resolve();
+        $fillable = $instance->fillable;
+
+        foreach ($records as $record) {
+            $filteredData = array_filter(
+                $record,
+                fn($key) => in_array($key, $fillable),
+                ARRAY_FILTER_USE_KEY
+            );
+            $instance->save($filteredData);
         }
     }
 
     /**
-     * Factory method to create a new model instance with defaults.
+     * Set the table name for the model.
+     *
+     * @param string $table
+     * @return $this
      */
-    public static function new(array $attributes = []): self
+    public function setTable(string $table): self
     {
-        return new static($attributes);
-    }
-
-    public function __get(string $name): mixed
-    {
-        if (array_key_exists($name, $this->attributes)) {
-            return $this->attributes[$name];
-        }
-
-        throw new \InvalidArgumentException(
-            "Property '{$name}' does not exist on this model."
-        );
-    }
-
-    public function __set(string $name, mixed $value): void
-    {
-        if (in_array($name, $this->fillable)) {
-            $this->attributes[$name] = $value;
-            return;
-        }
-
-        throw new \InvalidArgumentException(
-            "Cannot set property '{$name}' that is not fillable."
-        );
-    }
-
-    public function fill(array $attributes): self
-    {
-        foreach ($attributes as $key => $value) {
-            $this->{$key} = $value;
-        }
+        $this->table = $table;
+        $this->orm->setTable($table);
         return $this;
     }
 
-    public function toArray(): array
+    /**
+     * Save the given data to the database.
+     *
+     * @param array $data
+     * @return object
+     */
+    public function save(array $data): object
     {
-        return $this->attributes;
-    }
+        $data = $this->sanitizeInput($data);
 
-    public static function find(string|int $id): ?self
-    {
-        $instance = new static();
-        $result = $instance->adapter->find(
-            $instance->table,
-            $instance->key,
-            $id
-        );
-        return $result ? $instance->fill($result) : null;
-    }
-
-    public static function findBy(string $field, mixed $value): ?self
-    {
-        $instance = new static();
-        $result = $instance->adapter->find($instance->table, $field, $value);
-        return $result ? $instance->fill($result) : null;
-    }
-
-    public static function where(array $conditions): QueryBuilder
-    {
-        $instance = new static();
-        return (new QueryBuilder($instance->table, $instance->adapter))->where(
-            $conditions
-        );
-    }
-
-    public static function all(): array
-    {
-        $instance = new static();
-        $results = $instance->adapter->all($instance->table);
-        return array_map(fn($data) => (new static())->fill($data), $results);
-    }
-
-    public function save(): bool
-    {
-        if (empty($this->{$this->key})) {
-            $this->{$this->key} = $this->generatePrimaryKey();
+        if ($this->isUuidEnabled() && !isset($data["id"])) {
+            $data["id"] = $this->uuidManager->generate($this->keyStrategy);
         }
 
-        return $this->adapter->save($this->table, $this->toArray(), $this->key);
-    }
-
-    /**
-     * Insert multiple records into the database.
-     */
-    public static function insert(array $records): void
-    {
-        $db = (new static())->getDatabaseAdapter();
-        $db->save((new static())->getTableName(), $records);
-    }
-
-    /**
-     * Get the table name for the model.
-     */
-    public function getTableName(): string
-    {
-        return $this->tableName;
-    }
-
-    /**
-     * Fill attributes with defaults and validate against schema.
-     */
-    protected function validateAndFillDefaults(array $attributes): array
-    {
-        $filled = [];
-
-        foreach ($this->schema as $field => $rules) {
-            if (array_key_exists($field, $attributes)) {
-                $filled[$field] = $attributes[$field];
-            } elseif (isset($rules["default"])) {
-                $filled[$field] = $this->resolveDefault($rules["default"]);
-            } elseif (!empty($rules["required"])) {
-                throw new \InvalidArgumentException(
-                    "Field '{$field}' is required."
-                );
+        if (isset($data["id"])) {
+            $existingRecord = $this->orm->find($data["id"]);
+            if ($existingRecord) {
+                return $this->orm->update($data["id"], $data)
+                    ? (object) $data
+                    : null;
             }
         }
 
-        return $filled;
+        return $this->orm->insert($data);
     }
 
     /**
-     * Resolve default values for a field.
+     * Delete a record by its ID.
+     *
+     * @param string|int $id
+     * @return bool
      */
-    protected function resolveDefault(mixed $default): mixed
+    public function delete(string|int $id): bool
     {
-        if (is_callable($default)) {
-            return call_user_func($default);
+        return $this->orm->delete($id);
+    }
+
+    /**
+     * Enable or disable UUID generation for the model.
+     *
+     * @param bool $enable
+     * @return $this
+     */
+    public function enableUuid(bool $enable): self
+    {
+        $this->runtimeUuid = $enable;
+        return $this;
+    }
+
+    /**
+     * Check if UUID generation is enabled for the model.
+     *
+     * @return bool
+     */
+    protected function isUuidEnabled(): bool
+    {
+        return $this->runtimeUuid !== null ? $this->runtimeUuid : $this->uuid;
+    }
+
+    /**
+     * Execute a raw query.
+     *
+     * @param string $query
+     * @param array $bindings
+     * @return mixed
+     */
+    public function rawQuery(string $query, array $bindings = []): mixed
+    {
+        return $this->orm->rawQuery($query, $bindings);
+    }
+
+    /**
+     * Sanitize input data based on the fillable fields.
+     *
+     * @param array $data
+     * @return array
+     */
+    private function sanitizeInput(array $data): array
+    {
+        if (empty($this->fillable)) {
+            return $data;
         }
-        return $default;
-    }
 
-    public function delete(): bool
-    {
-        return $this->adapter->delete($this->table, $this->{$this->key});
-    }
-
-    public function generatePrimaryKey(): string
-    {
-        return $this->keyGenerator->generate(
-            $this->keyStrategy,
-            $this->keyLength,
-            $this->keyFields ?? []
+        return array_filter(
+            $data,
+            fn($key) => in_array($key, $this->fillable),
+            ARRAY_FILTER_USE_KEY
         );
     }
 
     /**
-     * Get the database adapter from the container.
+     * Determine if the model uses soft deletes.
+     *
+     * @return bool
      */
-    protected function getDatabaseAdapter(): ORMDatabaseAdapterInterface
+    public function usesSoftDeletes(): bool
     {
-        return ContainerHelper::getContainer()->resolve(
-            ORMDatabaseAdapterInterface::class
-        );
+        return property_exists($this, "usesSoftDeletes") &&
+            $this->usesSoftDeletes;
+    }
+
+    /**
+     * Get the table name associated with the model.
+     *
+     * @return string
+     */
+    public function getTableName(): string
+    {
+        return $this->table;
     }
 }

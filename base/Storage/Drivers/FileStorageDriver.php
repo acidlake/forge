@@ -9,7 +9,20 @@ class FileStorageDriver implements StorageManagerInterface
 
     public function __construct(string $storagePath)
     {
-        $this->storagePath = rtrim($storagePath, "/") . "/";
+        $this->storagePath =
+            rtrim($storagePath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+
+        // Ensure the directory exists
+        if (!is_dir($this->storagePath)) {
+            if (
+                !mkdir($this->storagePath, 0755, true) &&
+                !is_dir($this->storagePath)
+            ) {
+                throw new \RuntimeException(
+                    "Failed to create storage directory: {$this->storagePath}"
+                );
+            }
+        }
     }
 
     public function set(string $key, mixed $value, ?int $ttl = null): void

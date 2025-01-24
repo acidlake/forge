@@ -30,8 +30,13 @@ class ContainerHelper
     public static function getContainer(): Container
     {
         if (self::$container === null) {
-            self::$container = new Container();
+            throw new \RuntimeException("Container is not set.");
         }
         return self::$container;
+    }
+
+    public static function setContainer(Container $container): void
+    {
+        self::$container = $container;
     }
 }

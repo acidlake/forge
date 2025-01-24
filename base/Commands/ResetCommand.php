@@ -3,8 +3,8 @@
 namespace Base\Commands;
 
 use Base\Database\BaseSchemaBuilder;
-use Base\Database\MigrationManager;
-use Base\Database\SeederManager;
+use Base\Core\MigrationManager;
+use Base\Core\SeederManager;
 use Base\Interfaces\CommandInterface;
 
 class ResetCommand implements CommandInterface
@@ -34,7 +34,7 @@ class ResetCommand implements CommandInterface
         // Run migrations
         echo "Running migrations...\n";
         $migrationManager = new MigrationManager();
-        $migrationManager->migrate();
+        $migrationManager->run();
         echo "Migrations completed successfully.\n";
 
         // Run seeders if requested

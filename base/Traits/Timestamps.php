@@ -1,26 +1,23 @@
 <?php
 namespace Base\Traits;
 
+use DateTime;
+
 trait Timestamps
 {
-    /**
-     * Automatically set timestamps on save.
-     *
-     * @return bool
-     */
-    public function save(): bool
-    {
-        $timestamp = date("Y-m-d H:i:s");
+    protected bool $usesTimestamps = true;
 
-        if (!isset($this->{$this->key})) {
-            // Insert: Set created_at and updated_at
-            $this->created_at = $timestamp;
-            $this->updated_at = $timestamp;
-        } else {
-            // Update: Only set updated_at
-            $this->updated_at = $timestamp;
+    public function save(array $data): object
+    {
+        $now = (new DateTime())->format("Y-m-d H:i:s");
+
+        if ($this->usesTimestamps) {
+            if (!isset($data["id"])) {
+                $data["created_at"] = $now;
+            }
+            $data["updated_at"] = $now;
         }
 
-        return parent::save();
+        return parent::save($data);
     }
 }

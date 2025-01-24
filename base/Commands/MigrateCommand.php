@@ -1,11 +1,19 @@
 <?php
+
 namespace Base\Commands;
 
-use Base\Database\MigrationManager;
+use Base\Core\MigrationManager;
 use Base\Interfaces\CommandInterface;
 
 class MigrateCommand implements CommandInterface
 {
+    protected MigrationManager $migrationManager;
+
+    public function __construct(MigrationManager $migrationManager)
+    {
+        $this->migrationManager = $migrationManager;
+    }
+
     public function getName(): string
     {
         return "migrate";
@@ -13,13 +21,11 @@ class MigrateCommand implements CommandInterface
 
     public function getDescription(): string
     {
-        return "Run database migrations to create or update tables.";
+        return "Run all pending migrations.";
     }
 
     public function execute(array $arguments = []): void
     {
-        $migrationManager = new MigrationManager();
-        $migrationManager->migrate();
-        echo "Migrations completed successfully.\n";
+        $this->migrationManager->run();
     }
 }

@@ -51,8 +51,12 @@ class HomeController
          */
         $view = $this->resolve(ViewInterface::class);
 
-        //
-        $user = User::find(1);
+        /**
+         * Resolve the ViewInterface instance from the DI container.
+         *
+         * @var User $user
+         */
+        $userData = User::find(1);
 
         /**
          * @var JWTInterface $jwt
@@ -93,6 +97,7 @@ class HomeController
         echo "<br />";
         echo "<br />";
         echo "send email";
+        //$this->sendEmail();
 
         /**
          * @var StorageManagerInterface $storage
@@ -130,6 +135,11 @@ class HomeController
             "class" => "btn btn-primary",
         ];
 
+        $users = [
+            "name" => "test",
+            "none" => "hi",
+        ];
+
         /**
          * Data passed to the `home.index` view template.
          *
@@ -142,7 +152,9 @@ class HomeController
             "isLoggedIn" => true,
             "posts" => $posts,
             "attributes" => $attributes,
-            "user" => $user,
+            "user" => $userData,
+            "users" => $users,
+            "counter" => 10,
         ];
 
         if (EnvHelper::is("development")) {
@@ -161,5 +173,24 @@ class HomeController
 
         // Render the view template with the prepared data
         return $view->render("home.index", $data);
+    }
+    public function sendEmail()
+    {
+        /**
+         * @var NotificationManagerInterface $notifications
+         */
+        $notifications = $this->resolve(NotificationManagerInterface::class);
+
+        $data = [
+            "to" => "jeremias2@gmail.com",
+            "subject" => "Welcome to Forge",
+            "message" =>
+                "<h1>Thank you for signing up!</h1><p>Welcome to Forge</p>",
+            "isHtml" => true,
+        ];
+
+        $success = $notifications->send("email", $data);
+
+        return $success ? "Email sent!" : "Failed to send email.";
     }
 }
