@@ -390,4 +390,19 @@ class Blueprint implements BlueprintInterface
         }
         return "CREATE TABLE {$this->table} ({$columns})";
     }
+
+    public function dummyData(): array
+    {
+        $data = [];
+        foreach ($this->columns as $column) {
+            if (strpos($column, "VARCHAR") !== false) {
+                $data[] = str_repeat("x", 10); // Example dummy string
+            } elseif (strpos($column, "INT") !== false) {
+                $data[] = rand(1, 100); // Example random number
+            } elseif (strpos($column, "TIMESTAMP") !== false) {
+                $data[] = date("Y-m-d H:i:s"); // Example timestamp
+            }
+        }
+        return $data;
+    }
 }

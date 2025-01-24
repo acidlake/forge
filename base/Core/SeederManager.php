@@ -4,12 +4,12 @@ namespace Base\Core;
 
 use Base\Interfaces\SeederInterface;
 use Base\Database\DatabaseAdapterInterface;
+use Base\Tools\StructurePathResolver;
 use Exception;
 
 class SeederManager
 {
     protected DatabaseAdapterInterface $db;
-    protected array $seeders = [];
 
     public function __construct(DatabaseAdapterInterface $db)
     {
@@ -17,44 +17,59 @@ class SeederManager
     }
 
     /**
-     * Register a seeder.
+     * Run a specific seeder or the default `DatabaseSeeder`.
      *
      * @param string $seederClass The fully qualified class name of the seeder.
      */
-    public function register(string $seederClass): void
+    public function run(string $seederClass): void
     {
+        // Resolve the namespace of the seeder
+        $seederClass = $this->resolveSeederClass($seederClass);
+
         if (!class_exists($seederClass)) {
             throw new Exception("Seeder class {$seederClass} not found.");
         }
 
-        $this->seeders[] = $seederClass;
+        /** @var SeederInterface $seeder */
+        $seeder = new $seederClass($this->db);
+        $seeder->run();
     }
 
     /**
-     * Run all registered seeders.
+     * Rollback a specific seeder or the default `DatabaseSeeder`.
+     *
+     * @param string $seederClass The fully qualified class name of the seeder.
      */
-    public function run(): void
+    public function rollback(string $seederClass): void
     {
-        foreach ($this->seeders as $seederClass) {
-            /** @var SeederInterface $seeder */
-            $seeder = new $seederClass($this->db);
-            echo "Running seeder: {$seederClass}\n";
-            $seeder->run();
+        // Resolve the namespace of the seeder
+        $seederClass = $this->resolveSeederClass($seederClass);
+
+        if (!class_exists($seederClass)) {
+            throw new Exception("Seeder class {$seederClass} not found.");
+        }
+
+        /** @var SeederInterface $seeder */
+        $seeder = new $seederClass($this->db);
+        if (method_exists($seeder, "rollback")) {
+            $seeder->rollback();
         }
     }
 
     /**
-     * Rollback all seeders.
+     * Resolve the fully qualified class name of a seeder based on structure type.
+     *
+     * @param string $seederClass
+     * @return string
      */
-    public function rollback(): void
+    private function resolveSeederClass(string $seederClass): string
     {
-        foreach (array_reverse($this->seeders) as $seederClass) {
-            /** @var SeederInterface $seeder */
-            $seeder = new $seederClass($this->db);
-            if (method_exists($seeder, "rollback")) {
-                echo "Rolling back seeder: {$seederClass}\n";
-                $seeder->rollback();
-            }
+        if (class_exists($seederClass)) {
+            return $seederClass;
         }
+
+        $seederPath = StructurePathResolver::resolvePath("seeders");
+        return StructurePathResolver::resolveNamespace($seederPath) .
+            "\\{$seederClass}";
     }
 }

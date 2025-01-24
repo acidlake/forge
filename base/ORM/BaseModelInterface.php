@@ -125,4 +125,21 @@ interface BaseModelInterface
      * @return bool
      */
     public function usesSoftDeletes(): bool;
+
+    public static function createMany(array $records): void;
+
+    /**
+     * Generate a UUID using the configured strategy.
+     *
+     * @param string|null $strategy The strategy to use for UUID generation (optional).
+     * @return string The generated UUID.
+     */
+    public static function generateUUID(string $strategy = null): string;
+
+    /**
+     * Get the table name associated with the model.
+     *
+     * @return string
+     */
+    public function getTableName(): string;
 }

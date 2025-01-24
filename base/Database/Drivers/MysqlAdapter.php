@@ -45,7 +45,7 @@ class MysqlAdapter implements DatabaseAdapterInterface
         return $stmt->execute($bindings);
     }
 
-    public function query(string $query): void
+    public function query(string $query, array $params = []): mixed
     {
         $this->pdo->exec($query);
     }

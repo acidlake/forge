@@ -5,6 +5,7 @@ use Base\Core\Container;
 use Base\Core\SeederManager;
 use Base\Database\BaseSchemaBuilder;
 use Base\Core\MigrationManager;
+use Base\Interfaces\ORMDatabaseAdapterInterface;
 use Base\Interfaces\ProviderInterface;
 use Base\Database\DatabaseAdapterInterface;
 use Base\ORM\DefaultOrmManager;
@@ -60,6 +61,13 @@ class DatabaseServiceProvider implements ProviderInterface
         ) {
             $adapter = $container->resolve(DatabaseAdapterInterface::class);
             return new DefaultOrmManager($adapter);
+        });
+
+        // Bind ORMDatabaseAdapterInterface
+        $container->bind(ORMDatabaseAdapterInterface::class, function (
+            Container $container
+        ) {
+            return $container->resolve(DatabaseAdapterInterface::class);
         });
     }
 }

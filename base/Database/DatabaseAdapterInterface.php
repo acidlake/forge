@@ -10,6 +10,6 @@ interface DatabaseAdapterInterface
 
     public function execute(string $query, array $bindings = []): bool;
     public function fetchOne(string $query, array $bindings = []): ?array;
-    public function query(string $query): void;
+    public function query(string $sql, array $params = []): mixed;
 }
 ?>

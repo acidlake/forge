@@ -20,6 +20,10 @@ return [
                 EnvHelper::get("CONTROLLERS_PATH", "app/Controllers"),
                 BASE_PATH
             ),
+            "seeders" => PathHelper::resolve(
+                EnvHelper::get("SEEDERS_PATH", "app/Database/Seeders"),
+                BASE_PATH
+            ),
             "views" => PathHelper::resolve(
                 EnvHelper::get("VIEWS_PATH", "app/Views"),
                 BASE_PATH
@@ -28,6 +32,10 @@ return [
         "clean" => [
             "migrations" => PathHelper::resolve(
                 EnvHelper::get("MIGRATIONS_PATH", "app/Database/Migrations"),
+                BASE_PATH
+            ),
+            "seeders" => PathHelper::resolve(
+                EnvHelper::get("SEEDERS_PATH", "app/Database/Seeders"),
                 BASE_PATH
             ),
             "models" => PathHelper::resolve(
@@ -62,12 +70,26 @@ return [
                 ),
                 BASE_PATH
             ),
+            "seeders" => PathHelper::resolve(
+                EnvHelper::get(
+                    "MODULE_SEEDERS_PATH",
+                    "app/Modules/Shared/Seeders"
+                ),
+                BASE_PATH
+            ),
         ],
         "ddd" => [
             "migrations" => PathHelper::resolve(
                 EnvHelper::get(
                     "MIGRATIONS_PATH",
                     "src/Infrastructure/Migrations"
+                ),
+                BASE_PATH
+            ),
+            "seeders" => PathHelper::resolve(
+                EnvHelper::get(
+                    "MODULE_SEEDERS_PATH",
+                    "src/Infrastructure/Seeders"
                 ),
                 BASE_PATH
             ),

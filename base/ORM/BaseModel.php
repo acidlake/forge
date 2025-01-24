@@ -183,6 +183,31 @@ abstract class BaseModel implements BaseModelInterface
         $this->orm->where($conditions);
         return $this;
     }
+    /**
+     * Generate a UUID using the configured strategy.
+     *
+     * @param string|null $strategy The strategy to use for UUID generation (optional).
+     * @return string The generated UUID.
+     */
+    public static function generateUUID(string $strategy = null): string
+    {
+        return static::resolve()->uuidManager->generate($strategy);
+    }
+
+    public static function createMany(array $records): void
+    {
+        $instance = static::resolve();
+        $fillable = $instance->fillable;
+
+        foreach ($records as $record) {
+            $filteredData = array_filter(
+                $record,
+                fn($key) => in_array($key, $fillable),
+                ARRAY_FILTER_USE_KEY
+            );
+            $instance->save($filteredData);
+        }
+    }
 
     /**
      * Set the table name for the model.
@@ -296,5 +321,15 @@ abstract class BaseModel implements BaseModelInterface
     {
         return property_exists($this, "usesSoftDeletes") &&
             $this->usesSoftDeletes;
+    }
+
+    /**
+     * Get the table name associated with the model.
+     *
+     * @return string
+     */
+    public function getTableName(): string
+    {
+        return $this->table;
     }
 }

@@ -6,13 +6,13 @@ use Base\Core\SeederManager;
 use Base\Interfaces\CommandInterface;
 use Base\Tools\StructurePathResolver;
 
-class SeedCommand implements CommandInterface
+class SeedRollbackCommand implements CommandInterface
 {
     public function __construct(protected SeederManager $seederManager) {}
 
     public function getName(): string
     {
-        return "seed";
+        return "seed:rollback";
     }
 
     public function getDescription(): string
@@ -29,8 +29,8 @@ class SeedCommand implements CommandInterface
 
         $seederName = $arguments[0] ?? $defaultSeeder;
 
-        echo "Running seeder: {$seederName}\n";
+        echo "Rollback seeder: {$seederName}\n";
 
-        $this->seederManager->run($seederName);
+        $this->seederManager->rollback($seederName);
     }
 }

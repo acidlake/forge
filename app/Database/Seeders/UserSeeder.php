@@ -1,44 +1,30 @@
 <?php
 
-namespace App\Seeders;
+namespace App\Database\Seeders;
 
-use Base\Interfaces\SeederInterface;
+use Base\Database\BaseSeeder;
 use Base\Database\DatabaseAdapterInterface;
 use App\Models\User;
 
-class UserSeeder implements SeederInterface
+class UserSeeder extends BaseSeeder
 {
     public function __construct(protected DatabaseAdapterInterface $db) {}
 
     public function run(): void
     {
-        echo "Seeding users...\n";
-
-        // Beginner-friendly approach: Use the ORM
-        User::createMany([
-            [
-                "uuid" => User::generateUUID(),
-                "name" => "John Doe",
-                "email" => "john@example.com",
-                "role" => "admin",
-            ],
-            [
-                "uuid" => User::generateUUID(),
-                "name" => "Jane Doe",
-                "email" => "jane@example.com",
-                "role" => "user",
-            ],
+        $this->seedModel(User::class, [
+            ["name" => "John Doe", "lastName" => "Doe"],
+            ["name" => "Jane Smith", "lastName" => "Smith"],
         ]);
     }
 
     public function rollback(): void
     {
-        echo "Rolling back users...\n";
+        echo "Rolling back User data...\n";
 
-        // Rollback: Delete users by condition
-        User::whereIn("email", [
-            "john@example.com",
-            "jane@example.com",
-        ])->delete();
+        // Rollback logic for UserSeeder
+        this->rollbackModel(User::class, [
+            "name" => ["John Doe", "Jane Smith"],
+        ]);
     }
 }
