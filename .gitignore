@@ -9,10 +9,12 @@
 # Ignore temporary files and logs
 /storage/*.key
 /storage/*.log
-/storage/framework/cache/*
-/storage/framework/sessions/*
+/storage/cache/*
+/storage/sessions/*
 /storage/framework/views/*
 !/storage/.gitignore
+/storage/*.key
+
 
 # Ignore cache and logs
 *.log

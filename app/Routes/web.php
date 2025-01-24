@@ -1,19 +1,18 @@
 <?php
+
 namespace App\Routes;
 
+use App\Controllers\Api\UserController;
 use App\Controllers\HomeController;
-use Base\Core\ContainerHelper;
-use Base\Core\RouterInterface;
-use Base\Core\ViewInterface;
+use Base\Interfaces\RouterInterface;
 
 return function (RouterInterface $router) {
-    /** @var ViewInterface $view */
-    $view = ContainerHelper::getContainer()->resolve(ViewInterface::class);
     $router->get("/functional", function () {
         return "Functional route works!";
     });
 
-    $router->get("/", [HomeController::class, "index"]);
+    $router->get("/", [HomeController::class, "index"], "home.index");
+    $router->resource("users", UserController::class, "users");
 
     $router->get("/user/{id}", function ($id) {
         echo "User ID: $id";

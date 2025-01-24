@@ -2,10 +2,32 @@
 
 namespace Base\Templates\SyntaxHandlers;
 
-use Base\Templates\SyntaxHandlerInterface;
+use Base\Interfaces\SyntaxHandlerInterface;
 
+/**
+ * SwitchHandler processes `{#switch}` syntax for conditional branching in templates.
+ *
+ * Handles `{#switch}`, `{#case}`, and `{:default}` syntax to generate PHP `switch` statements dynamically.
+ *
+ * @framework Forge
+ * @license MIT
+ * @github acidlake
+ * @author Jeremias
+ * @copyright 2025
+ */
 class SwitchHandler implements SyntaxHandlerInterface
 {
+    /**
+     * Process the template content to handle `{#switch}` syntax.
+     *
+     * Matches `{#switch $variable}`, `{#case value}`, and `{:default}` blocks and replaces
+     * them with corresponding PHP `switch`, `case`, and `default` statements.
+     *
+     * @param string $content The template content to process.
+     * @param array  $data    An associative array of dynamic data for template rendering (not used in this handler).
+     *
+     * @return string The processed template content with `{#switch}` syntax replaced by PHP code.
+     */
     public function process(string $content, array $data): string
     {
         return preg_replace_callback(

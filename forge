@@ -1,0 +1,68 @@
+#!/usr/bin/env php
+<?php
+/**
+ * Forge CLI Entry Point.
+ *
+ * This script serves as the command-line interface (CLI) entry point for the Forge framework.
+ * It allows developers to execute framework and application-specific commands using the `php forge` command.
+ *
+ * Example usage:
+ *   php forge <command> [arguments]
+ *
+ * @framework Forge
+ * @license MIT
+ * @github acidlake
+ * @author Jeremias
+ * @entrypoint CLI Entry Point
+ * @version 1.0.0
+ * @copyright 2025
+ */
+
+define("BASE_PATH", __DIR__); // Define the base path for the framework.
+define("ENV_PATH", BASE_PATH . "/.env"); // Path to the .env file
+define("CORE_CONFIG_PATH", BASE_PATH . "/config/"); // Define the path for framework configuration files.
+define("APP_CONFIG_PATH", BASE_PATH . "/app/config/"); // Define the path for application configuration files.
+
+// Load the .env file
+require_once __DIR__ . "/base/Tools/EnvLoader.php";
+Base\Tools\EnvLoader::load(ENV_PATH);
+
+// Autoload framework and application classes
+require_once __DIR__ . "/base/Core/Autoloader.php";
+Base\Core\Autoloader::register();
+
+use Base\Core\Container;
+use Base\Core\ContainerHelper;
+use Base\Core\CoreServiceProvider;
+use Base\Core\CLI;
+use Base\Core\RouteLoader;
+use Base\Core\RouterHelper;
+use Base\Interfaces\RouterInterface;
+use Base\Tools\InternalRoutes;
+
+try {
+    // Create and set the container
+    $container = new Container();
+    ContainerHelper::setContainer($container);
+
+    // Register core services
+    $coreServiceProvider = new CoreServiceProvider();
+    $coreServiceProvider->register($container);
+
+    //
+    $router = $container->resolve(RouterInterface::class);
+    RouterHelper::setRouter($router);
+
+    InternalRoutes::register($router);
+    RouteLoader::load($router);
+
+    // Resolve and handle CLI commands
+    $cli = $container->resolve(CLI::class);
+    $cli->handle($argv);
+} catch (Throwable $e) {
+    // Handle and log errors
+    echo "An error occurred: " . $e->getMessage() . "\n";
+    echo $e->getTraceAsString();
+    exit(1);
+}
+

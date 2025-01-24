@@ -1,0 +1,96 @@
+# ====================================
+# General Application Settings
+# ====================================
+APP_NAME="Forge Framework"
+APP_VERSION="0.1.2"
+APP_ENV="development" # Options: development, production, staging
+APP_DEBUG=true # WARNING: Do not enable in production environments
+
+# ====================================
+# Database Configuration
+# ====================================
+
+# The default database connection type
+DB_CONNECTION="mysql"
+DB_HOST="127.0.0.1" # The database host (usually an IP address or hostname)
+DB_PORT=3306 # The port for the database connection
+DB_DATABASE="forge" # The name of the database
+DB_USERNAME="root" # The database username
+DB_PASSWORD="root"
+DB_DSN="mysql:host=localhost;dbname=forge;port=3306"
+
+# ====================================
+# Cache Configuration
+# ====================================
+CACHE_DRIVER="file" # Options: file, redis, memcached
+REDIS_HOST="127.0.0.1" # Redis host for caching (only if CACHE_DRIVER is set to redis)
+REDIS_PORT=6379 # Redis port for caching
+
+# ====================================
+# Storage Configuration
+# ====================================
+FILE_STORAGE_PATH=public/storage/files
+FILE_STORAGE_DRIVER=local # Options: local
+
+# ====================================
+# Session Configuration
+# ====================================
+SESSION_STORAGE_PATH=storage/sessions
+SESSION_STORAGE_DRIVER=file # Options: file, redis, database
+
+# ====================================
+# Mail Configuration
+# ====================================
+MAIL_DRIVER="smtp" # Options: smtp, sendmail, mailgun, etc.
+MAIL_HOST="localhost"
+MAIL_PORT=1025
+MAIL_USERNAME=
+MAIL_PASSWORD=
+MAIL_FROM="no-reply@forge.com"
+MAIL_ENCRYPTION="none" # Options: tls, ssl, none
+
+# ====================================
+# Logging Configuration
+# ====================================
+
+# The log channel to use
+LOG_CHANNEL="daily" # Options: single, daily, syslog, errorlog
+LOG_PATH=storage/logs
+LOG_LEVEL="debug"
+
+# ====================================
+# Security Configuration
+# ====================================
+APP_KEY="your-secret-key" # The secret key for application encryption
+JWT_SECRET="your-secret-key"
+IP_WHITELIST_ADDRESSES="127.0.0.1, 192.168.1.1"
+
+# OTP Configuration
+OTP_CODE_LENGTH=6
+OTP_DELIVERY_METHOD=email
+
+# Rate Limiting Configuration
+RATE_LIMIT_MAX_REQUESTS=6
+RATE_LIMIT_TIME_FRAME=60
+
+# Circuit Breaker Configuration
+CIRCUIT_BREAKER_FAILURE_THRESHOLD=5
+CIRCUIT_BREAKER_TIME_FRAME=60
+
+# ====================================
+# Miscellaneous Settings
+# ====================================
+APP_TIMEZONE="UTC"
+APP_LOCALE="en"
+APP_FALLBACK_LOCALE="en"
+
+# SMS Configuration
+TWILIO_ACCOUNT_SID=your-twilio-account-sid
+TWILIO_AUTH_TOKEN=your-twilio-auth-token
+TWILIO_FROM=+1234567890
+
+# Push Notification
+FIREBASE_KEY=your-firebase-key
+
+# project structure Options: clean, modular, dd(domain driven design), default
+PROJECT_STRUCTURE_TYPE=default

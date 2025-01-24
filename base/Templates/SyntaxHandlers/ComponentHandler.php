@@ -2,10 +2,32 @@
 
 namespace Base\Templates\SyntaxHandlers;
 
-use Base\Templates\SyntaxHandlerInterface;
+use Base\Interfaces\SyntaxHandlerInterface;
 
+/**
+ * ComponentHandler processes and renders custom components in templates.
+ *
+ * Supports self-closing components (e.g., `<include-component />`) and
+ * components with slots (e.g., `<include-component>...</include-component>`).
+ *
+ * @framework Forge
+ * @license MIT
+ * @author Jeremias
+ * @github acidlake
+ * @copyright 2025
+ */
 class ComponentHandler implements SyntaxHandlerInterface
 {
+    /**
+     * Process the template content to replace custom component syntax with rendered output.
+     *
+     * Handles both self-closing components and components with slots.
+     *
+     * @param string $content The template content to process.
+     * @param array  $data    An associative array of dynamic data for component rendering.
+     *
+     * @return string The processed template content with components rendered.
+     */
     public function process(string $content, array $data): string
     {
         // Match self-closing components (e.g., <include-... />)
@@ -34,6 +56,20 @@ class ComponentHandler implements SyntaxHandlerInterface
         return $content;
     }
 
+    /**
+     * Render a component by including its corresponding template file.
+     *
+     * Parses attributes, merges with provided data, and includes the component template file.
+     *
+     * @param string $component  The component name in dot notation (e.g., 'components.header').
+     * @param string $attributes The attributes string from the component tag.
+     * @param array  $data       An associative array of dynamic data for component rendering.
+     * @param string $slot       The inner content (slot) for the component (optional).
+     *
+     * @throws \RuntimeException If the component file does not exist.
+     *
+     * @return string The rendered output of the component.
+     */
     private function renderComponent(
         string $component,
         string $attributes,

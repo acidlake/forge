@@ -6,6 +6,7 @@
     <title>{{ $title }}</title>
 </head>
 <body>
+
     {#include "partials.header"}
 
     <h1>Welcome to {{ $frameworkName }}</h1>
@@ -16,9 +17,9 @@
         <pre>
             {print_r($posts)}
         </pre>
-
         {#if $isLoggedIn}
-        <p>Welcome back, {{ $user }}</p>
+        <p>Welcome back,  {{$user->name}}</p>
+        {{ $users["name"] }}
         {:else}
         <p>Please login</p>
         {/if}
@@ -34,5 +35,24 @@
         <p>Total posts: {{ $totalPosts }}</p>
 
         <a $attributes>Visit Example</a>
+
+        {#while ($counter > 0)}
+        <p>{{ $counter }}</p>
+            {#set $counter = $counter - 1}
+        {/while}
+
+
+        <h2>Numbers</h2>
+        {#range 1 to 5 as $number}
+            <p>Number: {{ $number }}</p>
+        {/range}
+
+        {Base\Helpers\StringHelper::capitalizeWords("jeremias nunez pozo")}
+
+        <p>Current date: {date('Y-m-d', 'now')}</p>
+
+        <script>
+            var userData = {json($user)};
+        </script>
 </body>
 </html>
