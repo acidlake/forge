@@ -64,13 +64,13 @@ class Blueprint implements BlueprintInterface
     /**
      * Adds a primary key column.
      *
-     * @param string $field The name of the column.
+     * @param string $name The name of the column.
      * @return $this
      */
-    public function primary(string $field): self
+    public function primary(string $name): self
     {
-        $this->columns[] = "PRIMARY KEY (`{$field}`)";
-        $this->lastColumn = $field;
+        $this->columns[] = "PRIMARY KEY (`{$name}`)";
+        $this->lastColumn = $name;
         return $this;
     }
 
@@ -90,26 +90,26 @@ class Blueprint implements BlueprintInterface
     /**
      * Adds an auto-incrementing primary key column.
      *
-     * @param string $field The name of the column.
+     * @param string $name The name of the column.
      * @return $this
      */
-    public function autoIncrement(string $field): self
+    public function autoIncrement(string $name): self
     {
-        $this->columns[] = "`{$field}` INT AUTO_INCREMENT PRIMARY KEY";
-        $this->lastColumn = $field;
+        $this->columns[] = "`{$name}` INT AUTO_INCREMENT PRIMARY KEY";
+        $this->lastColumn = $name;
         return $this;
     }
 
     /**
      * Adds a unique constraint to a column.
      *
-     * @param string $field The name of the column.
+     * @param string $name The name of the column.
      * @return $this
      */
-    public function unique(string $field): self
+    public function unique(string $name): self
     {
-        $this->columns[] = "UNIQUE KEY `unique_{$field}` (`{$field}`)";
-        $this->lastColumn = $field;
+        $this->columns[] = "UNIQUE KEY `unique_{$name}` (`{$name}`)";
+        $this->lastColumn = $name;
         return $this;
     }
 
