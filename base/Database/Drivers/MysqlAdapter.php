@@ -25,6 +25,13 @@ class MysqlAdapter implements DatabaseAdapterInterface
         return $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
     }
 
+    public function fetchOne(string $query, array $bindings = []): ?array
+    {
+        $stmt = $this->pdo->prepare($query);
+        $stmt->execute($bindings);
+        return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+    }
+
     public function fetchAll(string $query, array $bindings = []): array
     {
         $stmt = $this->pdo->prepare($query);
@@ -36,6 +43,11 @@ class MysqlAdapter implements DatabaseAdapterInterface
     {
         $stmt = $this->pdo->prepare($query);
         return $stmt->execute($bindings);
+    }
+
+    public function query(string $query): void
+    {
+        $this->pdo->exec($query);
     }
 }
 ?>
