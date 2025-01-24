@@ -85,4 +85,5 @@ interface RouterInterface
     public function api(string $prefix, callable $callback): void;
 
     public function getRoutes(): array;
+    public function resource(string $name, string $controller): void;
 }

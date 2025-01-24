@@ -1,8 +1,8 @@
 <?php
-
 namespace Base\Commands;
 
 use Base\Core\RouterHelper;
+use Base\Helpers\RouteListHelper;
 use Base\Interfaces\CommandInterface;
 use Base\Interfaces\RouterInterface;
 
@@ -29,86 +29,13 @@ class RouteListCommand implements CommandInterface
     {
         $router = RouterHelper::getRouter();
         $routes = $router->getRoutes();
+        $routeListHelper = new RouteListHelper();
 
         if (empty($routes)) {
             echo "No routes have been registered.\n";
-            error_log(print_r($this->router, true)); // Debug router instance
             return;
         }
 
-        // Header for the table
-        $header = ["Method", "URI", "Handler", "Middleware"];
-
-        // Collect route data
-        $rows = [];
-        foreach ($routes as $route) {
-            $handler = is_array($route["handler"])
-                ? implode("@", $route["handler"])
-                : (is_callable($route["handler"])
-                    ? "Closure"
-                    : $route["handler"]);
-
-            $middleware = !empty($route["middleware"])
-                ? implode(", ", array_map("get_class", $route["middleware"]))
-                : "None";
-
-            $rows[] = [
-                $route["method"],
-                $route["pattern"],
-                $handler,
-                $middleware,
-            ];
-        }
-
-        // Render the table
-        $this->renderTable($header, $rows);
-    }
-
-    private function renderTable(array $header, array $rows): void
-    {
-        // Calculate column widths
-        $columnWidths = array_map(function ($column) use ($header, $rows) {
-            $maxLength = strlen($header[$column]);
-            foreach ($rows as $row) {
-                $maxLength = max($maxLength, strlen($row[$column]));
-            }
-            return $maxLength;
-        }, array_keys($header));
-
-        // Render the header
-        $line =
-            "+-" .
-            implode(
-                "-+-",
-                array_map(fn($width) => str_repeat("-", $width), $columnWidths)
-            ) .
-            "-+";
-        echo $line . "\n";
-        echo "| " .
-            implode(
-                " | ",
-                array_map(
-                    fn($col, $width) => str_pad($header[$col], $width),
-                    array_keys($header),
-                    $columnWidths
-                )
-            ) .
-            " |\n";
-        echo $line . "\n";
-
-        // Render the rows
-        foreach ($rows as $row) {
-            echo "| " .
-                implode(
-                    " | ",
-                    array_map(
-                        fn($col, $width) => str_pad($row[$col], $width),
-                        array_keys($header),
-                        $columnWidths
-                    )
-                ) .
-                " |\n";
-        }
-        echo $line . "\n";
+        $routeListHelper->renderRouteList($routes);
     }
 }
