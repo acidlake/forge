@@ -88,6 +88,11 @@ php forge migrate
 php forge seed
 ```
 
+### Command List
+```bash
+php forge list
+```
+
 ### Rolling Back Migrations
 ```bash
 php forge migrate:rollback

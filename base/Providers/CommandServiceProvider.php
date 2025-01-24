@@ -5,6 +5,7 @@ use Base\Commands\GenerateOTPCommand;
 use Base\Commands\HelpCommand;
 use Base\Commands\MigrateCommand;
 use Base\Commands\MigrateRollbackCommand;
+use Base\Commands\RouteListCommand;
 use Base\Commands\SeedCommand;
 use Base\Core\Container;
 use Base\Core\CLI;
@@ -13,6 +14,7 @@ use Base\Core\SeederManager;
 use Base\Interfaces\CommandInterface;
 use Base\Interfaces\OTPManagerInterface;
 use Base\Interfaces\ProviderInterface;
+use Base\Interfaces\RouterInterface;
 
 class CommandServiceProvider implements ProviderInterface
 {
@@ -61,6 +63,11 @@ class CommandServiceProvider implements ProviderInterface
         });
         $otpCommand = $container->resolve(GenerateOTPCommand::class);
         $cli->registerCommand($otpCommand);
+
+        $router = $container->resolve(RouterInterface::class);
+        $routeListCommand = new RouteListCommand($router);
+        $container->bind(RouteListCommand::class, fn() => $routeListCommand);
+        $cli->registerCommand($routeListCommand);
 
         // Auto-register other commands
         $this->loadCommands(

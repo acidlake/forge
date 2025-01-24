@@ -30,14 +30,10 @@ class RouteLoader
      */
     public static function load(RouterInterface $router): void
     {
-        // Loop through all route files in app/Routes/
         foreach (glob(BASE_PATH . "/app/Routes/*.php") as $routeFile) {
-            // Include the route file and retrieve the callback
             $routeCallback = require $routeFile;
 
-            // Ensure the file returns a valid callable
             if (is_callable($routeCallback)) {
-                // Pass the router to the callback
                 $routeCallback($router);
             } else {
                 throw new Exception("Invalid route callback in {$routeFile}");

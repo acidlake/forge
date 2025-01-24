@@ -83,4 +83,6 @@ interface RouterInterface
     public function dispatch(): void;
 
     public function api(string $prefix, callable $callback): void;
+
+    public function getRoutes(): array;
 }

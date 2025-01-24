@@ -20,6 +20,9 @@ class RouterServiceProvider implements ProviderInterface
             fn() => new \Base\Adapters\CustomRouter()
         );
 
+        $router = $container->resolve(RouterInterface::class);
+        error_log(get_class($router));
+
         $container->bind(RequestInterface::class, fn() => new Request());
         $container->bind(ResponseInterface::class, fn() => new Response());
 

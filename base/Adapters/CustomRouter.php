@@ -3,6 +3,7 @@
 namespace Base\Adapters;
 
 use Base\Core\ContainerAwareTrait;
+use Base\Core\RouterHelper;
 use Base\Interfaces\ConfigHelperInterface;
 use Base\Interfaces\EnvValueParserInterface;
 use Base\Interfaces\RouterInterface;
@@ -37,6 +38,11 @@ class CustomRouter implements RouterInterface
      * @var array
      */
     private array $middlewareStack = [];
+
+    public function getRoutes(): array
+    {
+        return $this->routes;
+    }
 
     /**
      * Register a GET route.
@@ -106,6 +112,9 @@ class CustomRouter implements RouterInterface
      */
     public function dispatch(): void
     {
+        $router = RouterHelper::getRouter();
+        $routes = $router->getRoutes();
+
         $httpMethod = $_SERVER["REQUEST_METHOD"];
         $uri = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
 

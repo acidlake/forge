@@ -31,6 +31,7 @@ use Base\Core\ContainerHelper;
 use Base\Core\ProviderLoader;
 use Base\Core\CoreServiceProvider;
 use Base\Core\RouteLoader;
+use Base\Core\RouterHelper;
 use Base\Interfaces\RouterInterface;
 use Base\Tools\InternalRoutes;
 use Base\Exceptions\ExceptionHandler;
@@ -65,6 +66,7 @@ ProviderLoader::load($container);
  * @var RouterInterface $router
  */
 $router = $container->resolve(RouterInterface::class);
+RouterHelper::setRouter($router);
 
 /**
  * Register internal framework-specific routes.

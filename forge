@@ -35,6 +35,10 @@ use Base\Core\Container;
 use Base\Core\ContainerHelper;
 use Base\Core\CoreServiceProvider;
 use Base\Core\CLI;
+use Base\Core\RouteLoader;
+use Base\Core\RouterHelper;
+use Base\Interfaces\RouterInterface;
+use Base\Tools\InternalRoutes;
 
 try {
     // Create and set the container
@@ -44,6 +48,13 @@ try {
     // Register core services
     $coreServiceProvider = new CoreServiceProvider();
     $coreServiceProvider->register($container);
+
+    //
+    $router = $container->resolve(RouterInterface::class);
+    RouterHelper::setRouter($router);
+
+    InternalRoutes::register($router);
+    RouteLoader::load($router);
 
     // Resolve and handle CLI commands
     $cli = $container->resolve(CLI::class);
