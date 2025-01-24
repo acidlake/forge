@@ -361,4 +361,13 @@ class Blueprint implements BlueprintInterface
     {
         return implode(", ", $this->columns);
     }
+
+    public function toSql(): string
+    {
+        $columns = implode(", ", $this->columns);
+        if ($this->modify) {
+            return "ALTER TABLE {$this->table} {$columns}";
+        }
+        return "CREATE TABLE {$this->table} ({$columns})";
+    }
 }

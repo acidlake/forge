@@ -4,9 +4,8 @@ namespace App\Database\Migrations;
 
 use Base\Core\MigrationBuilder;
 use Base\Core\Blueprint;
-use Base\Interfaces\MigrationInterface;
 
-class CreateUsersTable implements MigrationInterface
+class CreateUsersTable
 {
     public function up(): void
     {

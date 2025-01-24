@@ -3,6 +3,7 @@
 namespace Base\Commands;
 
 use Base\Interfaces\CommandInterface;
+use Base\Tools\ConfigHelper;
 
 class MakeControllerCommand implements CommandInterface
 {
@@ -26,43 +27,23 @@ class MakeControllerCommand implements CommandInterface
             return;
         }
 
-        $controllerName = ucfirst($controllerName); // Capitalize the first letter
+        $structureType = ConfigHelper::get("structure.type", "default");
+        $controllerPath = ConfigHelper::get(
+            "structure.paths.{$structureType}.controllers",
+            ConfigHelper::get("structure.paths.default.controllers")
+        );
 
-        // Check for the --resource flag and determine namespace
-        $isResource = in_array("--resource", $args, true);
-        $namespace = "App\\Controllers";
-        if ($isResource) {
-            $namespace .= "\\Resources";
-        }
+        $namespace = str_replace("/", "\\", $controllerPath);
+        $path = BASE_PATH . "/$controllerPath/$controllerName.php";
 
-        $path =
-            BASE_PATH .
-            "/" .
-            str_replace("\\", "/", $namespace) .
-            "/$controllerName.php";
-
-        // Ensure the directory exists
         if (!is_dir(dirname($path))) {
             mkdir(dirname($path), 0755, true);
         }
 
-        // Generate the controller content
-        $controllerContent = $this->getControllerContent(
-            $controllerName,
-            $namespace,
-            $isResource
-        );
-
-        // Check if the file already exists
         if (file_exists($path)) {
-            echo "The controller $controllerName already exists at $path. \n";
+            echo "The controller $controllerName already exists at $path.\n";
             return;
         }
-
-        // Write the controller to the file
-        file_put_contents($path, $controllerContent);
-
-        echo "Controller $controllerName created successfully at $path. \n";
     }
 
     private function getControllerContent(

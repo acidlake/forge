@@ -96,6 +96,14 @@ class MigrationManager
         });
     }
 
+    private function normalizePath(string $path): string
+    {
+        return rtrim(
+            str_replace(["\\", "/"], DIRECTORY_SEPARATOR, $path),
+            DIRECTORY_SEPARATOR
+        );
+    }
+
     protected function getMigrationPaths(): array
     {
         $structureType = ConfigHelper::get("structure.type", "default");
@@ -106,13 +114,50 @@ class MigrationManager
 
         if (empty($pathsConfig["migrations"])) {
             throw new \RuntimeException(
-                "No migration path configured for structure type: {$structureType}"
+                "No migration paths configured for structure type: {$structureType}"
             );
         }
 
-        return [
-            $pathsConfig["migrations"] => "App\\Database\\Migrations",
-        ];
+        $migrationPaths = [];
+
+        if ($structureType === "modular" && isset($pathsConfig["modules"])) {
+            // Handle modular paths
+            $modulesPath = $this->normalizePath($pathsConfig["modules"]);
+            $modules = glob("{$modulesPath}/*", GLOB_ONLYDIR);
+
+            foreach ($modules as $modulePath) {
+                $moduleName = basename($modulePath);
+                $migrationsPath = $this->normalizePath(
+                    "{$modulePath}/Database/Migrations"
+                );
+
+                if (is_dir($migrationsPath)) {
+                    $namespace = "App\\Modules\\{$moduleName}\\Database\\Migrations";
+                    $migrationPaths[$migrationsPath] = $namespace;
+                }
+            }
+        } else {
+            // Default or other structures
+            $migrationsPath = $this->normalizePath($pathsConfig["migrations"]);
+            $namespace = $this->resolveNamespace(
+                $migrationsPath,
+                $structureType
+            );
+            $migrationPaths[$migrationsPath] = $namespace;
+        }
+
+        return $migrationPaths;
+    }
+
+    private function resolveNamespace(
+        string $path,
+        string $structureType
+    ): string {
+        if ($structureType === "ddd") {
+            return "App\\Infrastructure\\Migrations";
+        }
+
+        return "App\\Database\\Migrations";
     }
 
     protected function scanDirectory(string $path, string $namespace): array
@@ -128,8 +173,26 @@ class MigrationManager
             $name = basename($file, ".php");
             $className = "{$namespace}\\{$name}";
 
+            if (!file_exists($file)) {
+                echo "Skipping missing file: {$file}\n";
+                continue;
+            }
+
+            if (
+                !preg_match(
+                    "/namespace\s+{$namespace};/",
+                    file_get_contents($file)
+                )
+            ) {
+                echo "Skipping file with mismatched namespace: {$file}\n";
+                continue;
+            }
+
+            require_once $file;
+
             if (!class_exists($className)) {
-                require_once $file; // Include the migration file
+                echo "Class {$className} not found in file: {$file}\n";
+                continue;
             }
 
             $migrations[] = [
@@ -149,7 +212,12 @@ class MigrationManager
             );
         }
 
-        return new $className($this->db, $this->schema);
+        try {
+            return new $className($this->db, $this->schema);
+        } catch (\Throwable $e) {
+            echo "Failed to instantiate migration {$className}: {$e->getMessage()}\n";
+            throw $e;
+        }
     }
 
     protected function isMigrationRun(string $name): bool

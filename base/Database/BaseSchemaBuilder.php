@@ -1,9 +1,9 @@
 <?php
 namespace Base\Database;
 
+use Base\Core\Blueprint;
 use Base\Interfaces\ORMDatabaseAdapterInterface;
 use Base\Interfaces\SchemaBuilderInterface;
-use Base\Database\SchemaBlueprint;
 
 /**
  * BaseSchemaBuilder provides the default implementation for schema building in the Forge framework.
@@ -24,7 +24,7 @@ class BaseSchemaBuilder implements SchemaBuilderInterface
 
     public function create(string $table, callable $blueprint): void
     {
-        $schema = new SchemaBlueprint($table);
+        $schema = new Blueprint($table);
         $blueprint($schema);
 
         $sql = $schema->toSql();
@@ -45,7 +45,7 @@ class BaseSchemaBuilder implements SchemaBuilderInterface
 
     public function table(string $table, callable $blueprint): void
     {
-        $schema = new SchemaBlueprint($table, true);
+        $schema = new Blueprint($table, true);
         $blueprint($schema);
 
         $sql = $schema->toSql();

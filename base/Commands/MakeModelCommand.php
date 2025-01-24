@@ -4,6 +4,7 @@ namespace Base\Commands;
 
 use Base\Interfaces\CommandInterface;
 use Base\Helpers\StringHelper;
+use Base\Tools\ConfigHelper;
 
 class MakeModelCommand implements CommandInterface
 {
@@ -27,32 +28,23 @@ class MakeModelCommand implements CommandInterface
             return;
         }
 
-        $modelName = ucfirst($modelName); // Capitalize the first letter
-        $namespace = $args[1] ?? "App\\Models"; // Default namespace
-        $path =
-            BASE_PATH .
-            "/" .
-            str_replace("\\", "/", $namespace) .
-            "/$modelName.php";
+        $structureType = ConfigHelper::get("structure.type", "default");
+        $modelPath = ConfigHelper::get(
+            "structure.paths.{$structureType}.models",
+            ConfigHelper::get("structure.paths.default.models")
+        );
 
-        // Ensure the directory exists
+        $namespace = str_replace("/", "\\", $modelPath);
+        $path = BASE_PATH . "/$modelPath/$modelName.php";
+
         if (!is_dir(dirname($path))) {
             mkdir(dirname($path), 0755, true);
         }
 
-        // Generate the model content
-        $modelContent = $this->getModelContent($modelName, $namespace);
-
-        // Check if the file already exists
         if (file_exists($path)) {
-            echo "The model $modelName already exists at $path. \n";
+            echo "The model $modelName already exists at $path.\n";
             return;
         }
-
-        // Write the model to the file
-        file_put_contents($path, $modelContent);
-
-        echo "Model $modelName created successfully at $path. \n";
     }
 
     private function getModelContent(

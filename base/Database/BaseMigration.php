@@ -2,8 +2,9 @@
 namespace Base\Database;
 
 use Base\Database\DatabaseAdapterInterface;
+use Base\Interfaces\MigrationInterface;
 
-abstract class BaseMigration
+abstract class BaseMigration implements MigrationInterface
 {
     protected DatabaseAdapterInterface $adapter;
     protected BaseSchemaBuilder $schema;
