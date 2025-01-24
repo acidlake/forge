@@ -12,7 +12,7 @@ return function (RouterInterface $router) {
     });
 
     $router->get("/", [HomeController::class, "index"], "home.index");
-    $router->resource("users", UserController::class);
+    $router->resource("users", UserController::class, "users");
 
     $router->get("/user/{id}", function ($id) {
         echo "User ID: $id";
