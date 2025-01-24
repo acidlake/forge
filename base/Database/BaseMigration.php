@@ -16,10 +16,10 @@ abstract class BaseMigration
         $this->schema = $schema;
     }
 
-    abstract public function up();
-    abstract public function down();
+    abstract public function up(): void;
+    abstract public function down(): void;
 
-    protected function raw(string $sql)
+    protected function raw(string $sql): void
     {
         $this->adapter->query($sql);
     }

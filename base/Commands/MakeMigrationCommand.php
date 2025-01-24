@@ -26,22 +26,23 @@ class MakeMigrationCommand implements CommandInterface
             return;
         }
 
-        // Get model path from configuration
-        $config = ConfigHelper::get(
-            "structure.migrations",
-            "app/Database/Migrations"
+        // Determine the project structure type
+        $structureType = ConfigHelper::get("structure.type", "default");
+        $migrationPath = ConfigHelper::get(
+            "structure.paths.{$structureType}.migrations",
+            ConfigHelper::get("structure.paths.default.migrations")
         );
-        $directory = BASE_PATH . "/" . $config;
 
-        if (!is_dir($directory)) {
-            mkdir($directory, 0755, true);
+        // Ensure the directory exists
+        if (!is_dir($migrationPath)) {
+            mkdir($migrationPath, 0755, true);
         }
 
+        // Create the migration file
         $timestamp = date("YmdHis");
         $className = ucfirst($migrationName);
         $fileName = "{$timestamp}_{$migrationName}.php";
-        $filePath = "{$directory}/{$migrationName}.php";
-        $namespace = str_replace("/", "\\", $config);
+        $filePath = "{$migrationPath}/{$fileName}";
 
         $template = <<<PHP
 <?php
