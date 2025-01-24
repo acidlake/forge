@@ -1,6 +1,15 @@
 ### v0.1.2
 - Feat: Added Storage Support
 - Feat: Added Notifications Support
+- Fix: Fixed Datatabase migrations
+- Fix: Fixed CLI
+- Feat: Added Structured definitions
+- Fix: Fixed Blueprint
+- Fix: Fixed Base model
+- Feat: Improved router registration
+- Feat: Improved CLI
+- Feat: Improved Services Providers Registration
+- Fix: Improved code
 
 ### v0.1.1
 - Feat: Added forge CLI
