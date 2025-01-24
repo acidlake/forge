@@ -11,8 +11,8 @@ return function (RouterInterface $router) {
         return "Functional route works!";
     });
 
-    $router->get("/", [HomeController::class, "index"]);
-    $router->get("/users", [UserController::class, "index"]);
+    $router->get("/", [HomeController::class, "index"], "home.index");
+    $router->resource("users", UserController::class);
 
     $router->get("/user/{id}", function ($id) {
         echo "User ID: $id";

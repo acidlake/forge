@@ -31,12 +31,7 @@ class Router implements RouterInterface
      * @var array
      */
     private array $routes = [];
-
-    /**
-     * Stack of global middleware applied to all routes.
-     *
-     * @var array
-     */
+    private array $namedRoutes = [];
     private array $middlewareStack = [];
 
     public function getRoutes(): array
@@ -44,48 +39,51 @@ class Router implements RouterInterface
         return $this->routes;
     }
 
-    /**
-     * Register a GET route.
-     *
-     * @param string         $route   The route pattern.
-     * @param callable|array $handler The route handler (callable or [Controller::class, 'method']).
-     */
-    public function get(string $route, callable|array $handler): void
-    {
-        $this->addRoute("GET", $route, $handler);
+    public function get(
+        string $route,
+        callable|array $handler,
+        ?string $name = null
+    ): void {
+        $this->addRoute("GET", $route, $handler, $name);
     }
 
-    /**
-     * Register a POST route.
-     *
-     * @param string         $route   The route pattern.
-     * @param callable|array $handler The route handler (callable or [Controller::class, 'method']).
-     */
-    public function post(string $route, callable|array $handler): void
-    {
-        $this->addRoute("POST", $route, $handler);
+    public function post(
+        string $route,
+        callable|array $handler,
+        ?string $name = null
+    ): void {
+        $this->addRoute("POST", $route, $handler, $name);
     }
 
-    /**
-     * Register a PUT route.
-     *
-     * @param string         $route   The route pattern.
-     * @param callable|array $handler The route handler (callable or [Controller::class, 'method']).
-     */
-    public function put(string $route, callable|array $handler): void
-    {
-        $this->addRoute("PUT", $route, $handler);
+    public function put(
+        string $route,
+        callable|array $handler,
+        ?string $name = null
+    ): void {
+        $this->addRoute("PUT", $route, $handler, $name);
     }
 
-    /**
-     * Register a DELETE route.
-     *
-     * @param string         $route   The route pattern.
-     * @param callable|array $handler The route handler (callable or [Controller::class, 'method']).
-     */
-    public function delete(string $route, callable|array $handler): void
+    public function delete(
+        string $route,
+        callable|array $handler,
+        ?string $name = null
+    ): void {
+        $this->addRoute("DELETE", $route, $handler, $name);
+    }
+
+    public function resource(string $name, string $controller): void
     {
-        $this->addRoute("DELETE", $route, $handler);
+        $this->get("/$name", [$controller, "index"], "{$name}.index");
+        $this->get("/$name/create", [$controller, "create"], "{$name}.create");
+        $this->post("/$name", [$controller, "store"], "{$name}.store");
+        $this->get("/$name/{id}", [$controller, "show"], "{$name}.show");
+        $this->get("/$name/{id}/edit", [$controller, "edit"], "{$name}.edit");
+        $this->put("/$name/{id}", [$controller, "update"], "{$name}.update");
+        $this->delete(
+            "/$name/{id}",
+            [$controller, "destroy"],
+            "{$name}.destroy"
+        );
     }
 
     /**
@@ -335,5 +333,19 @@ class Router implements RouterInterface
             $_COOKIE, // Cookies
             $_SERVER // Server data
         );
+    }
+
+    public function route(string $name, array $params = []): string
+    {
+        if (!isset($this->namedRoutes[$name])) {
+            throw new \RuntimeException("Route not found: {$name}");
+        }
+
+        $route = $this->namedRoutes[$name];
+        foreach ($params as $key => $value) {
+            $route = str_replace("{{$key}}", $value, $route);
+        }
+
+        return $route;
     }
 }
