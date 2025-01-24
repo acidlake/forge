@@ -19,6 +19,7 @@ class Blueprint implements BlueprintInterface
     public function string(string $name, int $length = 255): self
     {
         $this->columns[] = "`{$name}` VARCHAR({$length})";
+        $this->lastColumn = $name;
         return $this;
     }
 
@@ -31,6 +32,7 @@ class Blueprint implements BlueprintInterface
     public function uuid(string $name): self
     {
         $this->columns[] = "`{$name}` CHAR(36)";
+        $this->lastColumn = $name;
         return $this;
     }
 
@@ -55,6 +57,7 @@ class Blueprint implements BlueprintInterface
         $this->columns[] = "`created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP";
         $this->columns[] =
             "`updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP";
+        $this->lastColumn = null;
         return $this;
     }
 
@@ -67,6 +70,7 @@ class Blueprint implements BlueprintInterface
     public function primary(string $field): self
     {
         $this->columns[] = "PRIMARY KEY (`{$field}`)";
+        $this->lastColumn = $field;
         return $this;
     }
 
@@ -79,6 +83,7 @@ class Blueprint implements BlueprintInterface
     public function uuidPrimary(string $name = "id"): self
     {
         $this->columns[] = "`{$name}` CHAR(36) PRIMARY KEY";
+        $this->lastColumn = $name;
         return $this;
     }
 
@@ -91,6 +96,7 @@ class Blueprint implements BlueprintInterface
     public function autoIncrement(string $field): self
     {
         $this->columns[] = "`{$field}` INT AUTO_INCREMENT PRIMARY KEY";
+        $this->lastColumn = $field;
         return $this;
     }
 
@@ -103,6 +109,7 @@ class Blueprint implements BlueprintInterface
     public function unique(string $field): self
     {
         $this->columns[] = "UNIQUE KEY `unique_{$field}` (`{$field}`)";
+        $this->lastColumn = $name;
         return $this;
     }
 
@@ -115,6 +122,7 @@ class Blueprint implements BlueprintInterface
     public function json(string $name): self
     {
         $this->columns[] = "`{$name}` JSON";
+        $this->lastColumn = $name;
         return $this;
     }
 
@@ -129,6 +137,7 @@ class Blueprint implements BlueprintInterface
     {
         $allowedList = "'" . implode("','", $allowed) . "'";
         $this->columns[] = "`{$name}` ENUM({$allowedList})";
+        $this->lastColumn = $name;
         return $this;
     }
 
@@ -158,6 +167,7 @@ class Blueprint implements BlueprintInterface
     {
         $unsignedSql = $unsigned ? " UNSIGNED" : "";
         $this->columns[] = "`{$name}` BIGINT{$unsignedSql}";
+        $this->lastColumn = $name;
         return $this;
     }
 
@@ -170,6 +180,7 @@ class Blueprint implements BlueprintInterface
     public function boolean(string $name): self
     {
         $this->columns[] = "`{$name}` TINYINT(1)";
+        $this->lastColumn = $name;
         return $this;
     }
 
@@ -184,6 +195,7 @@ class Blueprint implements BlueprintInterface
     public function decimal(string $name, int $precision, int $scale): self
     {
         $this->columns[] = "`{$name}` DECIMAL({$precision}, {$scale})";
+        $this->lastColumn = $name;
         return $this;
     }
 
@@ -202,6 +214,7 @@ class Blueprint implements BlueprintInterface
     ): self {
         $precisionSql = $precision && $scale ? "({$precision}, {$scale})" : "";
         $this->columns[] = "`{$name}` FLOAT{$precisionSql}";
+        $this->lastColumn = $name;
         return $this;
     }
 
@@ -214,6 +227,7 @@ class Blueprint implements BlueprintInterface
     public function date(string $name): self
     {
         $this->columns[] = "`{$name}` DATE";
+        $this->lastColumn = $name;
         return $this;
     }
 
@@ -226,6 +240,7 @@ class Blueprint implements BlueprintInterface
     public function dateTime(string $name): self
     {
         $this->columns[] = "`{$name}` DATETIME";
+        $this->lastColumn = $name;
         return $this;
     }
 
@@ -238,6 +253,7 @@ class Blueprint implements BlueprintInterface
     public function text(string $name): self
     {
         $this->columns[] = "`{$name}` TEXT";
+        $this->lastColumn = $name;
         return $this;
     }
 
@@ -250,6 +266,7 @@ class Blueprint implements BlueprintInterface
     public function longText(string $name): self
     {
         $this->columns[] = "`{$name}` LONGTEXT";
+        $this->lastColumn = $name;
         return $this;
     }
 
@@ -262,6 +279,7 @@ class Blueprint implements BlueprintInterface
     public function time(string $name): self
     {
         $this->columns[] = "`{$name}` TIME";
+        $this->lastColumn = $name;
         return $this;
     }
 
@@ -274,6 +292,7 @@ class Blueprint implements BlueprintInterface
     public function timestamp(string $name): self
     {
         $this->columns[] = "`{$name}` TIMESTAMP";
+        $this->lastColumn = $name;
         return $this;
     }
 
@@ -286,6 +305,7 @@ class Blueprint implements BlueprintInterface
     public function binary(string $name): self
     {
         $this->columns[] = "`{$name}` BLOB";
+        $this->lastColumn = $name;
         return $this;
     }
 
@@ -303,8 +323,8 @@ class Blueprint implements BlueprintInterface
             );
         }
 
-        // Modify the last column definition to include NULL
-        $lastIndex = count($this->columns) - 1;
+        // Find the last column definition and append " NULL"
+        $lastIndex = array_key_last($this->columns);
         $this->columns[$lastIndex] .= " NULL";
 
         return $this;
@@ -336,8 +356,8 @@ class Blueprint implements BlueprintInterface
             );
         }
 
-        // Modify the last column definition to include the default value
-        $lastIndex = count($this->columns) - 1;
+        // Find the last column definition and append " DEFAULT value"
+        $lastIndex = array_key_last($this->columns);
         if (
             is_string($default) &&
             strpos($default, "CURRENT_TIMESTAMP") !== false

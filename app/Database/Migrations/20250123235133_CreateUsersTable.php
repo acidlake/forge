@@ -5,19 +5,20 @@ namespace App\Database\Migrations;
 use Base\Core\MigrationBuilder;
 use Base\Core\Blueprint;
 
-class CreateCreateRolesTable
+class CreateUsersTable
 {
     public function up(): void
     {
-        MigrationBuilder::create("roles_table", function (Blueprint $table) {
+        MigrationBuilder::create("users", function (Blueprint $table) {
             $table->autoIncrement("id");
-            $table->string("role", 255);
+            $table->string("name", 255);
+            $table->string("lastName", 255)->nullable();
             $table->timestamps();
         });
     }
 
     public function down(): void
     {
-        MigrationBuilder::dropIfExists("roles_table");
+        MigrationBuilder::dropIfExists("users");
     }
 }
