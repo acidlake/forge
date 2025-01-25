@@ -2,10 +2,11 @@
 
 namespace Base\Templates;
 
+use Base\Templates\View;
 use RuntimeException;
 
 /**
- * DefaultViewEngine provides a basic implementation of the TemplateEngine interface.
+ * ViewEngine provides a basic implementation of the TemplateEngine interface.
  *
  * This class is responsible for rendering view templates with support for custom syntax preprocessing.
  *
@@ -15,7 +16,7 @@ use RuntimeException;
  * @github acidlake
  * @copyright 2025
  */
-class DefaultViewEngine implements TemplateEngine
+class ViewEngine implements View
 {
     /**
      * Path to the directory containing view templates.
@@ -32,7 +33,14 @@ class DefaultViewEngine implements TemplateEngine
     private TemplatePreprocessor $preprocessor;
 
     /**
-     * Constructor for DefaultViewEngine.
+     * Array to hold custom paths for specific templates.
+     *
+     * @var array
+     */
+    private array $customPaths = [];
+
+    /**
+     * Constructor for ViewEngine.
      *
      * @param string $viewPath The base path to the view templates.
      */
@@ -87,16 +95,39 @@ class DefaultViewEngine implements TemplateEngine
     /**
      * Resolve the file path for a given template name.
      *
-     * Converts dot notation (e.g., 'home.index') to a directory structure
-     * and appends the '.php' extension.
-     *
      * @param string $template The template name.
      *
      * @return string The resolved file path for the template.
      */
     private function resolvePath(string $template): string
     {
-        $template = str_replace(".", "/", $template);
-        return $this->viewPath . $template . ".php";
+        $templatePath = str_replace(".", "/", $template);
+
+        foreach ($this->customPaths as $namespace => $path) {
+            if (str_starts_with($template, $namespace)) {
+                // If the template equals the namespace (e.g., "errors")
+                if ($template === $namespace) {
+                    return $path . $namespace . "/index.php"; // Match the folder's index.php
+                }
+
+                // If the template is nested (e.g., "errors.default"), include the relative path
+                $relativePath = substr($templatePath, strlen($namespace) + 1); // +1 for the dot separator
+                return $path . $namespace . "/" . $relativePath . ".php";
+            }
+        }
+
+        // Fallback to default path
+        return $this->viewPath . $templatePath . ".php";
+    }
+
+    /**
+     * Set a custom path for a specific namespace or template.
+     *
+     * @param string $namespace The namespace (e.g., 'errors').
+     * @param string $path      The custom path for the namespace.
+     */
+    public function setCustomPath(string $namespace, string $path): void
+    {
+        $this->customPaths[rtrim($namespace, ".")] = rtrim($path, "/") . "/";
     }
 }

@@ -1,6 +1,8 @@
 <?php
 namespace Base\Interfaces;
 
+use Base\Templates\View;
+
 interface ResponseInterface
 {
     public static function json(array $data, int $status = 200): void;
@@ -8,7 +10,7 @@ interface ResponseInterface
     public static function html(
         string $view,
         mixed $data,
-        ViewInterface $renderer,
+        View $renderer,
         int $status = 200
     ): void;
     public static function xml(array $data, int $status = 200): void;

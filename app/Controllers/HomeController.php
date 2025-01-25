@@ -8,7 +8,7 @@ use Base\Interfaces\JWTInterface;
 use Base\Interfaces\NotificationManagerInterface;
 use Base\Interfaces\OTPManagerInterface;
 use Base\Interfaces\StorageManagerInterface;
-use Base\Interfaces\ViewInterface;
+use Base\Templates\View;
 use Base\Helpers\EnvHelper;
 use App\Models\User;
 
@@ -45,14 +45,14 @@ class HomeController
         $config = $this->resolve(ConfigHelperInterface::class);
 
         /**
-         * Resolve the ViewInterface instance from the DI container.
+         * Resolve the View instance from the DI container.
          *
-         * @var ViewInterface $view
+         * @var View $view
          */
-        $view = $this->resolve(ViewInterface::class);
+        $view = $this->resolve(View::class);
 
         /**
-         * Resolve the ViewInterface instance from the DI container.
+         * Resolve the View instance from the DI container.
          *
          * @var User $user
          */

@@ -2,7 +2,7 @@
 namespace Base\Router\Http;
 
 use Base\Interfaces\ResponseInterface;
-use Base\Interfaces\ViewInterface;
+use Base\Templates\View;
 
 class Response implements ResponseInterface
 {
@@ -14,7 +14,7 @@ class Response implements ResponseInterface
         string $format = "json",
         int $status = 200,
         ?string $view = null,
-        ?ViewInterface $renderer = null
+        ?View $renderer = null
     ): void {
         switch ($format) {
             case "text":
@@ -73,7 +73,7 @@ class Response implements ResponseInterface
     public static function html(
         string $view,
         mixed $data,
-        ViewInterface $renderer,
+        View $renderer,
         int $status = 200
     ): void {
         http_response_code($status);

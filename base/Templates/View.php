@@ -15,7 +15,7 @@ namespace Base\Templates;
  * @github acidlake
  * @copyright 2025
  */
-interface TemplateEngine
+interface View
 {
     /**
      * Render a template with the provided data.
@@ -27,4 +27,5 @@ interface TemplateEngine
      * @return string The rendered template as a string.
      */
     public function render(string $template, array $data = []): string;
+    public function setCustomPath(string $template, string $path): void;
 }

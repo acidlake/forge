@@ -6,7 +6,7 @@ use Base\Controllers\BaseApiController;
 use Base\Core\ContainerAwareTrait;
 use Base\Helpers\HtmlPaginationHelper;
 use Base\Interfaces\RequestInterface as Request;
-use Base\Interfaces\ViewInterface;
+use Base\Templates\View;
 use Base\Router\Http\Response;
 
 class UserController extends BaseApiController
@@ -16,11 +16,11 @@ class UserController extends BaseApiController
     public function index(Request $request): array|string
     {
         /**
-         * Resolve the ViewInterface instance from the DI container.
+         * Resolve the View instance from the DI container.
          *
-         * @var ViewInterface $view
+         * @var View $view
          */
-        $view = $this->resolve(ViewInterface::class);
+        $view = $this->resolve(View::class);
 
         $page = $request->query("page", 1);
         $perPage = $request->query("per_page", 10);

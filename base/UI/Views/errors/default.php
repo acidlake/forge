@@ -67,7 +67,7 @@
 </head>
 <body>
     <div class="error-container">
-        <h1>Something went wrong! From User</h1>
+        <h1>Something went wrong!</h1>
 
         <!-- Exception Details -->
         <div class="error-details">

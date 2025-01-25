@@ -3,8 +3,9 @@ namespace Base\Exceptions;
 
 use Base\Core\ContainerHelper;
 use Base\Router\Http\Response;
-use Base\Interfaces\ViewInterface;
+use Base\Templates\View;
 use Base\Services\Log\LogManager;
+use Base\Tools\ConfigHelper;
 use Throwable;
 
 class ExceptionHandler
@@ -58,7 +59,17 @@ class ExceptionHandler
 
     private static function renderErrorPage(Throwable $exception): void
     {
-        $view = ContainerHelper::getContainer()->resolve(ViewInterface::class);
+        /**
+         * @var View $view
+         */
+        $view = ContainerHelper::getContainer()->resolve(View::class);
+
+        $defaultErrorViewPath = BASE_PATH . "/base/UI/Views";
+        $errorConfig = ConfigHelper::get("error");
+
+        if ($errorConfig["custom"]["enabled"] === "true") {
+            $defaultErrorViewPath = $errorConfig["custom"]["path"];
+        }
 
         // Collect additional information
         $trace = array_map(function ($frame) {
@@ -74,7 +85,7 @@ class ExceptionHandler
         $executionTime = microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"];
         $memoryUsage = memory_get_usage();
 
-        // Render the error page
+        $view->setCustomPath("errors", $defaultErrorViewPath);
         echo $view->render("errors.default", [
             "message" => $exception->getMessage(),
             "file" => $exception->getFile(),

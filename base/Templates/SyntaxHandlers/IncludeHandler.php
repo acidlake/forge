@@ -2,7 +2,7 @@
 
 namespace Base\Templates\SyntaxHandlers;
 
-use Base\Interfaces\ViewInterface;
+use Base\Templates\View;
 use Base\Interfaces\SyntaxHandlerInterface;
 
 /**
@@ -22,16 +22,16 @@ class IncludeHandler implements SyntaxHandlerInterface
     /**
      * The view renderer instance for rendering included templates.
      *
-     * @var ViewInterface
+     * @var View
      */
-    private ViewInterface $view;
+    private View $view;
 
     /**
      * Constructor for IncludeHandler.
      *
-     * @param ViewInterface $view The view renderer instance used for rendering included templates.
+     * @param View $view The view renderer instance used for rendering included templates.
      */
-    public function __construct(ViewInterface $view)
+    public function __construct(View $view)
     {
         $this->view = $view;
     }

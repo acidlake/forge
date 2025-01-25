@@ -62,7 +62,7 @@ namespace $namespace;
 
 use Base\Controllers\BaseApiController;
 use Base\Interfaces\RequestInterface as Request;
-use Base\Interfaces\ViewInterface;
+use Base\Templates\View;
 
 class $controllerName extends BaseApiController
 {
@@ -77,10 +77,10 @@ PHP;
     /**
      * Display a listing of the resource.
      *
-     * @param ViewInterface \$view
+     * @param View \$view
      * @return string
      */
-    public function index(ViewInterface \$view): string
+    public function index(View \$view): string
     {
         return \$view->render('default.index', [
             'title' => 'Welcome',
@@ -96,10 +96,10 @@ PHP;
     /**
      * Display a listing of the resource.
      *
-     * @param ViewInterface \$view
+     * @param View \$view
      * @return string
      */
-    public function index(ViewInterface \$view): string
+    public function index(View \$view): string
     {
         return \$view->render('default.index', [
             'title' => 'Resource Index',
