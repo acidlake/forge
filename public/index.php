@@ -12,11 +12,11 @@
  * @copyright 2025
  */
 
-define("BASE_PATH", dirname(__DIR__)); // Define the base path for the application.
-define("VIEW_PATH", BASE_PATH . "/app/Views/"); // Define the path for view templates.
-define("CORE_CONFIG_PATH", BASE_PATH . "/config/"); // Define the path for framework configuration files.
-define("APP_CONFIG_PATH", BASE_PATH . "/app/config/"); // Define the path for application configuration files.
-define("ENV_PATH", BASE_PATH . "/.env"); // Path to .env file
+define("BASE_PATH", dirname(__DIR__));
+define("VIEW_PATH", BASE_PATH . "/app/Views/");
+define("CORE_CONFIG_PATH", BASE_PATH . "/config/");
+define("APP_CONFIG_PATH", BASE_PATH . "/app/config/");
+define("ENV_PATH", BASE_PATH . "/.env");
 
 // Load the .env file
 require_once "../base/Tools/EnvLoader.php";

@@ -254,6 +254,34 @@ class Router implements RouterInterface
         }
     }
 
+    public function web(string $prefix, callable $callback): void
+    {
+        /**
+         * Define middleware specific to web routes.
+         *
+         * These middlewares handle tasks like session management, CSRF protection, etc.
+         *
+         * @var array $webMiddlewares
+         */
+        $webMiddlewares = [MiddlewareHelper::securityHeaders()];
+
+        $this->group($webMiddlewares, function () use ($prefix, $callback) {
+            $originalRoutes = $this->routes;
+            $this->routes = []; // Temporarily store new routes.
+
+            $callback($this); // Allow user to define routes.
+
+            foreach ($this->routes as &$route) {
+                // Prepend the prefix to the route's pattern.
+                $route["pattern"] = $this->convertToRegex(
+                    $prefix . substr($route["pattern"], 2, -2)
+                ); // Adjust regex
+            }
+
+            $this->routes = array_merge($originalRoutes, $this->routes); // Merge back with existing routes.
+        });
+    }
+
     public function api(string $prefix, callable $callback): void
     {
         /**

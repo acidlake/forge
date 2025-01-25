@@ -46,5 +46,11 @@ class InternalRoutes
                 echo json_encode(["status" => "ok", "uptime" => time()]);
             });
         });
+
+        $router->web("/_docs", function (RouterInterface $router) {
+            $router->get("/", function () {
+                echo json_encode(["status" => "ok", "uptime" => time()]);
+            });
+        });
     }
 }
